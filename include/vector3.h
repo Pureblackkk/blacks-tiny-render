@@ -134,7 +134,7 @@ void Vector3<T>::operator*=(const Vector3<T> &other) {
    z *= other.z;
 }
 
-// ===== Method
+// ===== Methods
 // Dot product
 template <typename T>
 T Vector3<T>::dot(const Vector3<T> &other) const {

@@ -1,6 +1,7 @@
 #include <tgaimage.h>
 #include <vector3.h>
 #include <vector4.h>
+#include <matrix4.h>
 #include <iostream>
 
 using namespace std;
@@ -21,10 +22,23 @@ int main(int argc, char** argv) {
 	image.write_tga_file("output.tga");
 
     // Test
-    Vector4f v1(1., 2., 3., 4.);
-    Vector4f v2(3., 4., 5., 6.);
-    Vector3f v3(1., 2., 3.);
-    Vector4f v4(v3, 4.);
-    v4.print();
+    Matrix4f v = Matrix4f(
+        Vector4f(1., 1., 1., 1.),
+        Vector4f(2., 2., 2., 2.),
+        Vector4f(0., 0., 2., 0.),
+        Vector4f(0., 0., 0., 2.)
+    );
+
+    TransformParameters testParameters;
+    Vector3f eye = Vector3f(0., 0., 1.);
+    Vector3f target = Vector3f(0., 0., 0.);
+    Vector3f up = Vector3f(0., 1., 0.);
+    
+    Matrix4f test = Matrix4f::lookAt(
+       eye,
+       target,
+       up
+    );
+    test.print();
 	return 0;
 }

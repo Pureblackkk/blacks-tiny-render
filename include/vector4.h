@@ -49,7 +49,7 @@ template <typename T>
 Vector4<T>::Vector4(T x, T y, T z, T w): x(x), y(y), z(z), w(w) {};
 
 template <typename T>
-Vector4<T>::Vector4(T data[4]): x(data[0]), y(data[1]), z(data[2], w(data[3])) {};
+Vector4<T>::Vector4(T data[4]): x(data[0]), y(data[1]), z(data[2]), w(data[3]) {};
 
 template <typename T>
 Vector4<T>::Vector4(Vector3<T> vector3, T w): x(vector3.x), y(vector3.y), z(vector3.z), w(w) {};
