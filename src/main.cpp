@@ -34,10 +34,10 @@ int main(int argc, char** argv) {
     Vector3f target = Vector3f(0., 0., 0.);
     Vector3f up = Vector3f(0., 1., 0.);
     
-    Matrix4f test = Matrix4f::lookAt(
-       eye,
-       target,
-       up
+    Matrix4f test = Matrix4f::orthoProject(
+        -1, 1,
+        -1, 1,
+        0, 2
     );
     test.print();
 	return 0;

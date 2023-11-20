@@ -320,11 +320,11 @@ Matrix4<float> Matrix4<T>::orthoProject(float left, float right, float bottom, f
 
     // Row1
     orthoProject.set(0, 0, 2 * lr);
-    orthoProject.set(0, 3, -(r + l) * lr);
+    orthoProject.set(0, 3, -(right + left) * lr);
     
     // Row2
     orthoProject.set(1, 1, 2 * br);
-    orthoProject.set(1, 3, -(top + bottom) * br)
+    orthoProject.set(1, 3, -(top + bottom) * br);
 
     // Row3
     orthoProject.set(2, 2, -2 * nr);
