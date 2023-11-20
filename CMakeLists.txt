@@ -5,11 +5,20 @@ project(blacks_tiny_render)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# inclue directories 
+# Support arm architecture
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+
+# Inclue directories 
 include_directories(include libs)
 
 # Source files
-file(GLOB SOURCES "*.h" "*.cpp" "src/*.cpp" "include/*.h" "libs/*.h" "libs/*.cpp")
-
+file(GLOB SOURCES
+    "*.h"
+    "*.cpp"
+    "include/*.h"
+    "libs/*.h"
+    "libs/*.cpp"
+    "src/*.cpp"
+)
 # Add the executable
 add_executable(blacks_tiny_render ${SOURCES})

@@ -1,4 +1,11 @@
 #include <tgaimage.h>
+#include <vector3.h>
+#include <vector4.h>
+#include <iostream>
+
+using namespace std;
+using std::cout;
+
 
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red   = TGAColor(255, 0,   0,   255);
@@ -6,7 +13,18 @@ const TGAColor red   = TGAColor(255, 0,   0,   255);
 int main(int argc, char** argv) {
 	TGAImage image(100, 100, TGAImage::RGB);
 	image.set(52, 41, red);
+    image.set(0, 0, red);
+    image.set(40, 40, red);
+    image.set(60, 60, red);
+    image.set(80, 80, red);
 	image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
 	image.write_tga_file("output.tga");
+
+    // Test
+    Vector4f v1(1., 2., 3., 4.);
+    Vector4f v2(3., 4., 5., 6.);
+    Vector3f v3(1., 2., 3.);
+    Vector4f v4(v3, 4.);
+    v4.print();
 	return 0;
 }
