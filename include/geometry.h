@@ -19,6 +19,7 @@ class Geometry {
         Vector3f vert(const int iface, const int nthvert) const;
         Vector3f normal(const int iface, const int nthvert) const;
         Vector2f uv(const int iface, const int nthvert) const;
+        void print() const;
 };
 
 #endif

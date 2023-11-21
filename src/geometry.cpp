@@ -1,3 +1,4 @@
+#include<iostream>
 #include<geometry.h>
 
 int Geometry::nverts() const {
@@ -22,6 +23,12 @@ Vector3f Geometry::normal(const int iface, const int nthvert) const {
 
 Vector2f Geometry::uv(const int iface, const int nthvert) const {
     return tex_coord[facet_tex[iface * 3 + nthvert]];
+}
+
+void Geometry::print() const {
+    std::cout << "Vertices number" << Geometry::nverts() << std::endl;
+    std::cout << "Faces number" << Geometry::nfaces() << std::endl;
+    return;
 }
 
 

@@ -1,8 +1,10 @@
+#include <iostream>
 #include <tgaimage.h>
 #include <vector3.h>
 #include <vector4.h>
 #include <matrix4.h>
-#include <iostream>
+#include <geometry.h>
+#include <loader.h>
 
 using namespace std;
 using std::cout;
@@ -22,15 +24,10 @@ int main(int argc, char** argv) {
 	image.write_tga_file("output.tga");
 
     // Test
-    Matrix4f v = Matrix4f(
-        Vector4f(1., 1., 1., 1.),
-        Vector4f(2., 2., 2., 2.),
-        Vector4f(0., 0., 2., 0.),
-        Vector4f(0., 0., 0., 2.)
-    );
+    Geometry geo;
+    std::string a = "../obj/floor/floor.obj";
+    Loader::loadGeometry(geo, a);
+    geo.print();
 
-    TransformParameters testParameters;
-    Vector3f test = Vector3f(Vector2f(1., 2.), 0.);
-    test.print();
 	return 0;
 }
