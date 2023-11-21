@@ -3,6 +3,7 @@
 
 #include<string>
 #include<cmath>
+#include<vector2.h>
 #include<vector3.h>
 
 template <typename T>
@@ -13,8 +14,10 @@ class Vector4 {
         Vector4(T data);
         Vector4(T x, T y, T z, T w);
         Vector4(T data[4]);
-        Vector4(Vector3<T> vector3, T w);
-        Vector4(T x, Vector3<T> vector3);
+        Vector4(const Vector3<T> vector3, T w);
+        Vector4(T x, const Vector3<T> vector3);
+        Vector4(const Vector2<T> vector2, T z, T w);
+        Vector4(T x, T y, const Vector2<T> vector2);
         // Operator overload
         Vector4<T> operator+(const T &other) const;
         Vector4<T> operator+(const Vector4<T> &other) const;
@@ -52,10 +55,16 @@ template <typename T>
 Vector4<T>::Vector4(T data[4]): x(data[0]), y(data[1]), z(data[2]), w(data[3]) {};
 
 template <typename T>
-Vector4<T>::Vector4(Vector3<T> vector3, T w): x(vector3.x), y(vector3.y), z(vector3.z), w(w) {};
+Vector4<T>::Vector4(const Vector3<T> vector3, T w): x(vector3.x), y(vector3.y), z(vector3.z), w(w) {};
 
 template <typename T>
-Vector4<T>::Vector4(T x, Vector3<T> vector3): x(x), y(vector3.x), z(vector3.y), w(vector3.z) {};
+Vector4<T>::Vector4(T x, const Vector3<T> vector3): x(x), y(vector3.x), z(vector3.y), w(vector3.z) {};
+
+template <typename T>
+Vector4<T>::Vector4(const Vector2<T> vector2, T z, T w): x(vector2.x), y(vector2.y), z(z), w(w) {};
+
+template <typename T>
+Vector4<T>::Vector4(T x, T y, const Vector2<T> vector2): x(x), y(y), z(vector2.x), w(vector2.y) {};
 
 // ===== Operator overload
 // +

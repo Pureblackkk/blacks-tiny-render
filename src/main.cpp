@@ -30,15 +30,7 @@ int main(int argc, char** argv) {
     );
 
     TransformParameters testParameters;
-    Vector3f eye = Vector3f(0., 0., 1.);
-    Vector3f target = Vector3f(0., 0., 0.);
-    Vector3f up = Vector3f(0., 1., 0.);
-    
-    Matrix4f test = Matrix4f::orthoProject(
-        -1, 1,
-        -1, 1,
-        0, 2
-    );
+    Vector3f test = Vector3f(Vector2f(1., 2.), 0.);
     test.print();
 	return 0;
 }

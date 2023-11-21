@@ -2,7 +2,8 @@
 #define VECTOR3_H
 
 #include<string>
-#include <cmath>
+#include<cmath>
+#include<vector2.h>
 
 template <typename T>
 class Vector3 {
@@ -12,6 +13,8 @@ class Vector3 {
         Vector3(T data);
         Vector3(T x, T y, T z);
         Vector3(T data[3]);
+        Vector3(const Vector2<T> vector2, T z);
+        Vector3(T x, const Vector2<T> vector2);
         // Operator overload
         Vector3<T> operator+(const T &other) const;
         Vector3<T> operator+(const Vector3<T> &other) const;
@@ -49,6 +52,12 @@ Vector3<T>::Vector3(T x, T y, T z): x(x), y(y), z(z) {};
 
 template <typename T>
 Vector3<T>::Vector3(T data[3]): x(data[0]), y(data[1]), z(data[2]) {};
+
+template <typename T>
+Vector3<T>::Vector3(const Vector2<T> vector2, T z): x(vector2.x), y(vector2.y), z(z) {};
+
+template <typename T>
+Vector3<T>::Vector3(T x, const Vector2<T> vector2): x(x), y(vector2.x), z(vector2.y) {};
 
 // ===== Operator overload
 // +
