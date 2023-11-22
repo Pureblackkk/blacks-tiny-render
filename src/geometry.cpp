@@ -22,7 +22,7 @@ Vector3f Geometry::normal(const int iface, const int nthvert) const {
 }
 
 Vector2f Geometry::uv(const int iface, const int nthvert) const {
-    return tex_coord[facet_tex[iface * 3 + nthvert]];
+    return tex_coords[facet_tex[iface * 3 + nthvert]];
 }
 
 void Geometry::print() const {

@@ -24,7 +24,7 @@ int Loader::loadGeometry(Geometry &geo, const std::string filename) {
         } else if(symbol == "vt") {
             Vector2f vt;
             lineStream >> vt.x >> vt.y;
-            geo.tex_coord.push_back(vt);
+            geo.tex_coords.push_back(vt);
         } else if(symbol == "vn") {
             Vector3f vn;
             lineStream >> vn.x >> vn.y >> vn.z;

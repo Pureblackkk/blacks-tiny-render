@@ -8,7 +8,7 @@
 class Geometry {
     public:
         std::vector<Vector3f> verts{};
-        std::vector<Vector2f> tex_coord{};
+        std::vector<Vector2f> tex_coords{};
         std::vector<Vector3f> norms{};
         std::vector<int> facet_vrt{};
         std::vector<int> facet_tex{};
