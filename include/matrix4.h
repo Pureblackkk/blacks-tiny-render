@@ -45,6 +45,8 @@ class Matrix4 {
         // Generate orthogonal projection matrix
         Matrix4<float> static orthoProject(float left, float right, float bottom, float top, float near, float far);
         // TODO: Generate perspective projection matrix
+        // Devices viewport matrix
+        Matrix4<float> static deviceViewPort(float width, float height);
         void print() const;
     private:
         T matrix[4][4];
@@ -331,6 +333,16 @@ Matrix4<float> Matrix4<T>::orthoProject(float left, float right, float bottom, f
     orthoProject.set(2, 3, -(near + far) * nr);
 
     return orthoProject;
+}
+
+// Devices viewport matrix
+template<typename T>
+Matrix4<float> Matrix4<T>::deviceViewPort(float width, float height) {
+    Matrix4f viewPortMatrix;
+    viewPortMatrix(0, 0, width / 2);
+    viewPortMatrix(0, 3, width / 2);
+    viewPortMatrix(1, 1, height / 2);
+    viewPortMatrix(1, 3, height / 2);
 }
 
 typedef Matrix4<int> Matrix4i;
