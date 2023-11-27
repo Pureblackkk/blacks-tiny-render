@@ -12,7 +12,7 @@ class Renderer {
 
     private:
         // TODO: check the value type for frame buffer
-        Buffer<uint32_t> *frameBuffer;
+        Buffer<Vector4f> *frameBuffer;
         Buffer<float> *depthBuffer;
         bool clipFaces(Vector4f (&clip_vert)[3]);
         void homogeneousnDivided(Vector4f (&clip_vert)[3]);

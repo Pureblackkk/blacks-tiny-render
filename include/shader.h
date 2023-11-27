@@ -25,7 +25,7 @@ struct FragmentShaderVariable {
 
 class Shader {
     public:
-        UniformShaderVariable &uniform;
+        UniformShaderVariable uniform;
         virtual Vector4f vertex(VertexShaderVariable &vertexShaderVariable);
         virtual Vector4f fragment(FragmentShaderVariable &fragmentShaderVariable);
 };

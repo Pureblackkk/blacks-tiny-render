@@ -2,8 +2,8 @@
 
 void Rasterizer::triangle(
     Vector4f (&clip_vert)[3],
-    Shader &shader,
-    Buffer<uint32_t> *frameBuffer,
+    Shader *shader,
+    Buffer<Vector4f> *frameBuffer,
     Buffer<float> *depthBuffer
 ) {
     // Define frame size vector width, height
@@ -28,7 +28,7 @@ void Rasterizer::triangle(
     Vector4i boundingBox(frameBuffer->width() - 1, 0, frameBuffer->height() - 1, 0);
     Rasterizer::triangleBoundingBox(view_vert_xy, boundingBox, frameBuffer);
 
-    // Define edges ab, bc, ca
+    // Define edges ba, cb, ac
     Vector2f edge[3] = {
         view_vert_xy[1] - view_vert_xy[0],
         view_vert_xy[2] - view_vert_xy[1],
@@ -39,10 +39,30 @@ void Rasterizer::triangle(
     for(int i = boundingBox.x; i <= boundingBox.y; ++i) {
         for(int j = boundingBox.z; j <= boundingBox.w; ++j) {
             // Skip those pixel not in the triangle
-            if(!isInsideTriagnle(view_vert_xy, edge, Vector2f(i + 0.5, j + 0.5))) continue;
-
-            // Get barycentric coordinates
+            Vector4f area;
+            if(!isInsideTriagnle(view_vert_xy, edge, area, Vector2f(i + 0.5, j + 0.5))) continue;
             
+            // Get barycentric coordinates
+            float factor = 1 / area.w;
+            area = area * factor;
+
+            // Skip pixel based on z-depth buffer
+            float zDpeth = Vector4f(
+                clip_vert[0].z,
+                clip_vert[1].z,
+                clip_vert[2].z,
+                0.0
+            ).dot(area);
+            if(zDpeth > depthBuffer->get(i, j) || zDpeth > 1.0) continue;
+
+            // TODO: Currently not set u,v
+            FragmentShaderVariable fragmentShaderVariable;
+            Vector4f color = shader->fragment(fragmentShaderVariable);
+
+            // Set depth buffer
+            depthBuffer->set(i, j, zDpeth);
+            // Set frame buffer
+            frameBuffer->set(i, j, color);
         }
     }
 }
@@ -50,7 +70,7 @@ void Rasterizer::triangle(
 void Rasterizer::triangleBoundingBox(
     Vector2f (&clip_vert)[3],
     Vector4i &boundingBox,
-    Buffer<uint32_t>* frameBuffer
+    Buffer<Vector4f>* frameBuffer
 ) {
     for(int i = 0; i < 3; ++i) {
         // x min
@@ -71,7 +91,8 @@ void Rasterizer::triangleBoundingBox(
 
 bool Rasterizer::isInsideTriagnle(
     Vector2f (&view_vert)[3],
-    Vector2f (&edge)[3],
+    Vector2f (&edge)[3], // ba, cb, ac
+    Vector4f &crossProduct,
     const Vector2f &point
 ) {
     Vector2f vec0 = view_vert[0] - point;
@@ -82,6 +103,12 @@ bool Rasterizer::isInsideTriagnle(
 
     Vector2f vec2 = view_vert[2] - point;
     float crossProduct2 = edge[2].cross(vec2);
+
+    // Pass the area value to the vector
+    crossProduct.x = crossProduct1; 
+    crossProduct.y = crossProduct2;
+    crossProduct.z = crossProduct0;
+    crossProduct.w = crossProduct0 + crossProduct1 + crossProduct2;
 
     return (
         crossProduct0 >= 0

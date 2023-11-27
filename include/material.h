@@ -5,7 +5,8 @@
 
 class Material {
     public:
-        Shader shader;
+        Shader *shader;
+        Material(Shader &bindShader);
         // TODO: add more material variable
 };
 

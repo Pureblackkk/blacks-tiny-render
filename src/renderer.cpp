@@ -3,7 +3,7 @@
 
 Renderer::Renderer(int width, int height) {
     // Initial frame buffer and depth buffer
-    Buffer<uint32_t> createdFrameBuffer(width, height);
+    Buffer<Vector4f> createdFrameBuffer(width, height);
     Buffer<float> createdDepthBuffer(width, height);
     frameBuffer = &createdFrameBuffer;
     depthBuffer = &createdDepthBuffer;
@@ -20,8 +20,8 @@ void Renderer::render(Scene &scene, Camera &camera) {
         Material *material = mesh->material;
 
         // Set global shader variable
-        material->shader.uniform.modelViewMatrix = camera.getViewMatrix();
-        material->shader.uniform.projectionMatrix = camera.getProjectionMatrix();
+        material->shader->uniform.modelViewMatrix = camera.getViewMatrix();
+        material->shader->uniform.projectionMatrix = camera.getProjectionMatrix();
 
         // Loop geometry faces
         const int meshFaces = geo->nfaces();
@@ -34,7 +34,7 @@ void Renderer::render(Scene &scene, Camera &camera) {
             for (int j : {0, 1, 2}) {
                 // TODO: currently we only set vertices
                 vsa.vert = geo->vert(i, j);
-                clip_vert[j] = material->shader.vertex(vsa);
+                clip_vert[j] = material->shader->vertex(vsa);
             }
 
             // Clip vertices

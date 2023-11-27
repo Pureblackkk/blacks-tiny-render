@@ -2,8 +2,8 @@
 
 class SimpleShader : public Shader {
     public:
-        virtual Vector4f vertex(VertexShaderVariable &VertexShaderVariable) {
-            Vector4f position(VertexShaderVariable.vert, 1.0);
+        virtual Vector4f vertex(VertexShaderVariable &vertexShaderVariable) {
+            Vector4f position(vertexShaderVariable.vert, 1.0);
             return uniform.projectionMatrix * uniform.modelViewMatrix * position;
         }
 

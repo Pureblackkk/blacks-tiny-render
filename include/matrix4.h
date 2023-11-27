@@ -338,11 +338,12 @@ Matrix4<float> Matrix4<T>::orthoProject(float left, float right, float bottom, f
 // Devices viewport matrix
 template<typename T>
 Matrix4<float> Matrix4<T>::deviceViewPort(float width, float height) {
-    Matrix4f viewPortMatrix;
-    viewPortMatrix(0, 0, width / 2);
-    viewPortMatrix(0, 3, width / 2);
-    viewPortMatrix(1, 1, height / 2);
-    viewPortMatrix(1, 3, height / 2);
+    Matrix4<float> viewPortMatrix;
+    viewPortMatrix.set(0, 0, width / 2);
+    viewPortMatrix.set(0, 3, width / 2);
+    viewPortMatrix.set(1, 1, height / 2);
+    viewPortMatrix.set(1, 3, height / 2);
+    return viewPortMatrix;
 }
 
 typedef Matrix4<int> Matrix4i;
