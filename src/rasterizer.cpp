@@ -43,8 +43,8 @@ void Rasterizer::triangle(
             if(!isInsideTriagnle(view_vert_xy, edge, area, Vector2f(i + 0.5, j + 0.5))) continue;
             
             // Get barycentric coordinates
-            float factor = 1 / area.w;
-            area = area * factor;
+            float barycentricFactor = 1 / area.w;
+            area = area * barycentricFactor;
 
             // Skip pixel based on z-depth buffer
             float zDpeth = Vector4f(
@@ -54,10 +54,10 @@ void Rasterizer::triangle(
                 0.0
             ).dot(area);
             if(zDpeth > depthBuffer->get(i, j) || zDpeth > 1.0) continue;
-
-            // TODO: Currently not set u,v
-            FragmentShaderVariable fragmentShaderVariable;
-            Vector4f color = shader->fragment(fragmentShaderVariable);
+            
+            // Set shader barycentricFactor
+            shader->barycentricFactor = Vector3f(area.x, area.y, area.z);
+            Vector4f color = shader->fragment();
 
             // Set depth buffer
             depthBuffer->set(i, j, zDpeth);
@@ -76,16 +76,16 @@ void Rasterizer::triangleBoundingBox(
         // x min
         boundingBox.x = std::min(boundingBox.x, static_cast<int>(clip_vert[i].x));
         // x max
-        boundingBox.y = std::min(boundingBox.y, static_cast<int>(clip_vert[i].x));
+        boundingBox.y = std::max(boundingBox.y, static_cast<int>(clip_vert[i].x));
         // y min
         boundingBox.z = std::min(boundingBox.z, static_cast<int>(clip_vert[i].y));
         // y max
-        boundingBox.w = std::min(boundingBox.w, static_cast<int>(clip_vert[i].y));
+        boundingBox.w = std::max(boundingBox.w, static_cast<int>(clip_vert[i].y));
     }
 
     boundingBox.x = std::max(boundingBox.x, 0);
     boundingBox.y = std::min(boundingBox.y, frameBuffer->width() - 1);
-    boundingBox.z = std::min(boundingBox.z, 0);
+    boundingBox.z = std::max(boundingBox.z, 0);
     boundingBox.w = std::min(boundingBox.w, frameBuffer->height() - 1);
 }
 

@@ -8,7 +8,10 @@
 class Renderer {
     public:
         Renderer(int width, int height);
-        void render(Scene &scene, Camera &camera);
+        ~Renderer();
+        void render(Scene &scene, Camera &camera, std::string outputPath);
+        // TODO: for realtime render
+        // void render(Scene &scene, Camera &camera, target);
 
     private:
         // TODO: check the value type for frame buffer
@@ -16,6 +19,7 @@ class Renderer {
         Buffer<float> *depthBuffer;
         bool clipFaces(Vector4f (&clip_vert)[3]);
         void homogeneousnDivided(Vector4f (&clip_vert)[3]);
+        void pRender(Scene &scene, Camera &camera);
 };
 
 #endif

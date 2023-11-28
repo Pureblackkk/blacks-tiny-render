@@ -1,20 +1,37 @@
 #include<renderer.h>
+#include<displayer.h>
 #include<rasterizer.h>
 
 Renderer::Renderer(int width, int height) {
     // Initial frame buffer and depth buffer
-    Buffer<Vector4f> createdFrameBuffer(width, height);
-    Buffer<float> createdDepthBuffer(width, height);
-    frameBuffer = &createdFrameBuffer;
-    depthBuffer = &createdDepthBuffer;
+    frameBuffer = new Buffer<Vector4f>(width, height);
+    depthBuffer = new Buffer<float>(width, height);
 }
 
-void Renderer::render(Scene &scene, Camera &camera) {
+Renderer::~Renderer() {
+    delete frameBuffer;
+    delete depthBuffer;
+}
+
+// Offline render
+void Renderer::render(Scene &scene, Camera &camera, std::string outputPath) {
+    // Render meshes
+    Renderer::pRender(scene, camera);
+
+    // Output framebuffer to certain path
+    Displayer::offlineDraw(outputPath, frameBuffer);
+}
+
+// TODO: Realtime render
+
+// Private render method
+void Renderer::pRender(Scene &scene, Camera &camera) {
     // Get meshes for render
     std::vector<Mesh*> meshes = scene.getMeshes();
 
     // Render meshes 
     for(Mesh* mesh : meshes) {
+        printf("meshhhhh\n");
         // Get mesh geometry and material
         Geometry *geo = mesh->geo;
         Material *material = mesh->material;
@@ -22,9 +39,11 @@ void Renderer::render(Scene &scene, Camera &camera) {
         // Set global shader variable
         material->shader->uniform.modelViewMatrix = camera.getViewMatrix();
         material->shader->uniform.projectionMatrix = camera.getProjectionMatrix();
+        material->shader->uniform.normalTexture = material->getDefaultTexture();
 
         // Loop geometry faces
         const int meshFaces = geo->nfaces();
+
         for (int i = 0; i < meshFaces; i++) {
             // Initialize vertex shader variable
             VertexShaderVariable vsa;
@@ -32,14 +51,17 @@ void Renderer::render(Scene &scene, Camera &camera) {
 
             // Loop each verteice in this face
             for (int j : {0, 1, 2}) {
-                // TODO: currently we only set vertices
                 vsa.vert = geo->vert(i, j);
+                vsa.tex_coord = geo->uv(i, j);
+                printf("%d, %d\n", i, j);
+                vsa.vert.print();
+                vsa.tex_coord.print();
                 clip_vert[j] = material->shader->vertex(vsa);
             }
 
             // Clip vertices
             if(clipFaces(clip_vert)) continue;
-
+            
             // Divided by w 
             Renderer::homogeneousnDivided(clip_vert);
 

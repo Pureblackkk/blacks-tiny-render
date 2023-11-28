@@ -307,7 +307,7 @@ Matrix4<float> Matrix4<T>::lookAt(const Vector3f &eye, const Vector3f &target, c
     lookAtMatrix.set(2, 1, direction.y);
     lookAtMatrix.set(2, 2, direction.z);
     lookAtMatrix.set(2, 3, direction.dot(t));
-
+    
     return lookAtMatrix;
 }
 

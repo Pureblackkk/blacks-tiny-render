@@ -37,7 +37,7 @@ int Loader::loadGeometry(Geometry &geo, const std::string filename) {
             while (lineStream >> v >> split >> t >> split >> n) {
                 geo.facet_vrt.push_back(--v);
                 geo.facet_tex.push_back(--t);
-                geo.facet_tex.push_back(--n);
+                geo.facet_nrm.push_back(--n);
                 count += 1;
             }
 

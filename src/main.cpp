@@ -1,33 +1,51 @@
-#include <iostream>
-#include <tgaimage.h>
-#include <vector3.h>
-#include <vector4.h>
-#include <matrix4.h>
-#include <geometry.h>
-#include <loader.h>
+#include<iostream>
+#include<tgaimage.h>
+#include<matrix4.h>
+#include<geometry.h>
+#include<loader.h>
+#include<renderer.h>
+#include<shader.h>
+#include<scene.h>
+#include<camera.h>
+#include<mesh.h>
 
 using namespace std;
 using std::cout;
 
-
-const TGAColor white = TGAColor(255, 255, 255, 255);
-const TGAColor red   = TGAColor(255, 0,   0,   255);
-
 int main(int argc, char** argv) {
-	TGAImage image(100, 100, TGAImage::RGB);
-	image.set(52, 41, red);
-    image.set(0, 0, red);
-    image.set(40, 40, red);
-    image.set(60, 60, red);
-    image.set(80, 80, red);
-	image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-	image.write_tga_file("output.tga");
+    // Initit scene, camera, renderer
+    Scene scene;
+    OrthoCamera camera(-1.2, 1.2, -1.2, 1.2, 0.01, 100);
+    Renderer renderer(500, 500);
 
-    // Test
+    // Set camera position, up, look at
+    camera.position(Vector3f(0.0, 0.0, 1.0));
+    camera.lookat(Vector3f(0.0, 0.0, 0.0));
+    camera.up(Vector3f(0.0, 1.0, 0.0));
+    
+    // Load geometry 1
     Geometry geo;
-    std::string a = "../obj/floor/floor.obj";
-    Loader::loadGeometry(geo, a);
-    geo.print();
+    // std::string path = "../obj/floor/floor.obj";
+    std::string path = "../obj/head/head.obj";
+    Loader::loadGeometry(geo, path);
+
+    // Define material
+    Material material(TEXTURE_SHADER);
+    TGAImage defaultTexture;
+    // defaultTexture.read_tga_file("../obj/floor/floor.tga");
+    // TODO: fix the texture bug
+    defaultTexture.read_tga_file("../obj/head/head.tga");
+    defaultTexture.flip_vertically();
+    material.bindDefaultTexture(&defaultTexture);
+
+    // Combine geometry and material to generate mesh
+    Mesh mesh(geo, material);
+
+    // Add mesh to scene
+    scene.add(mesh);
+
+    // Define output path
+    renderer.render(scene, camera, "framebuffer.tga");
 
 	return 0;
 }
