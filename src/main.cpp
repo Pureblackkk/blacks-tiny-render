@@ -15,27 +15,26 @@ using std::cout;
 int main(int argc, char** argv) {
     // Initit scene, camera, renderer
     Scene scene;
-    OrthoCamera camera(-1.2, 1.2, -1.2, 1.2, 0.01, 100);
+    // OrthoCamera camera(-1.2, 1.2, -1.2, 1.2, 0.01, 100);
+    PerspectiveCamera camera(60, 1.0, 0.01, 100);
     Renderer renderer(500, 500);
-
+    
     // Set camera position, up, look at
-    camera.position(Vector3f(0.0, 0.0, 1.0));
+    camera.position(Vector3f(0.0, 1.0, 3.0));
     camera.lookat(Vector3f(0.0, 0.0, 0.0));
     camera.up(Vector3f(0.0, 1.0, 0.0));
     
     // Load geometry 1
     Geometry geo;
     // std::string path = "../obj/floor/floor.obj";
-    std::string path = "../obj/head/head.obj";
+    std::string path = "../obj/diablo3_pose/diablo3_pose.obj";
     Loader::loadGeometry(geo, path);
 
     // Define material
     Material material(TEXTURE_SHADER);
     TGAImage defaultTexture;
     // defaultTexture.read_tga_file("../obj/floor/floor.tga");
-    // TODO: fix the texture bug
-    defaultTexture.read_tga_file("../obj/head/head.tga");
-    defaultTexture.flip_vertically();
+    Loader::loadTexture(defaultTexture, "../obj/diablo3_pose/diablo3_pose_diffuse.tga");
     material.bindDefaultTexture(&defaultTexture);
 
     // Combine geometry and material to generate mesh

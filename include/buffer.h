@@ -5,6 +5,7 @@ template<typename T>
 class Buffer {
     public:
         Buffer(int width, int height);
+        Buffer(int width, int height, const T initValue);
         void set(int x, int y, const T value);
         T get(int x, int y) const;
         int size() const;
@@ -25,6 +26,21 @@ Buffer<T>::Buffer(int width, int height) {
     bHeight = height;
     bSize = width * height;
     buffer = new T[width * height];
+}
+
+template<typename T>
+Buffer<T>::Buffer(int width, int height, const T initValue) {
+    bWidth = width;
+    bHeight = height;
+    bSize = width * height;
+    buffer = new T[width * height];
+
+    // Initial value
+    for (int i = 0; i < width; i++) {
+        for(int j = 0; j < height; j++) {
+            Buffer<T>::set(i, j, initValue);
+        }
+    }
 }
 
 template<typename T>

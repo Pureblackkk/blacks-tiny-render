@@ -6,7 +6,6 @@
 #include<vector4.h>
 // TODO: just for debugging
 #include<iostream>
-
 struct TransformParameters {
     TransformParameters(): scale(Vector3f(1., 1., 1.)) {};
     Vector3f translation;
@@ -25,6 +24,7 @@ class Matrix4 {
         // Operator overload
         Matrix4<T> operator*(const Matrix4<T> &other) const;
         Vector4<T> operator*(const Vector4<T> &other) const;
+        Matrix4<T> operator*(const T &other) const;
         // Transpose
         Matrix4<T> transpose() const;
         // TODO: inverse
@@ -45,6 +45,7 @@ class Matrix4 {
         // Generate orthogonal projection matrix
         Matrix4<float> static orthoProject(float left, float right, float bottom, float top, float near, float far);
         // TODO: Generate perspective projection matrix
+        Matrix4<float> static perspectiveProject(float fov, float aspect, float near, float far);
         // Devices viewport matrix
         Matrix4<float> static deviceViewPort(float width, float height);
         void print() const;
@@ -154,6 +155,17 @@ Vector4<T> Matrix4<T>::operator*(const Vector4<T> &other) const {
         data[i] = sum;
     }
     return Vector4<T>(data);
+}
+
+template <typename T>
+Matrix4<T> Matrix4<T>::operator*(const T &other) const {
+    Matrix4<T> results;
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; j++) {
+            results.set(i, j, matrix[i][j] * other);
+        }
+    }
+    return results;
 }
 
 // ===== Methods
@@ -270,8 +282,6 @@ Matrix4<float> Matrix4<T>::transformMatrix(TransformParameters &transform) {
         transform.rotation.z
     );
 
-    rotation.print();
-
     Matrix4<float> scale = Matrix4<float>::scaleMatrix(
         transform.scale.x,
         transform.scale.y,
@@ -333,6 +343,26 @@ Matrix4<float> Matrix4<T>::orthoProject(float left, float right, float bottom, f
     orthoProject.set(2, 3, -(near + far) * nr);
 
     return orthoProject;
+}
+
+// Generate perspective projection
+template <typename T>
+Matrix4<float> Matrix4<T>::perspectiveProject(float fov, float aspect, float near, float far) {
+    float fovPI = M_PI * fov / 180;
+
+    Matrix4<float> compressMatrix;
+    compressMatrix.set(0, 0, near);
+    compressMatrix.set(1, 1, near);
+    compressMatrix.set(2, 2, near + far);
+    compressMatrix.set(2, 3, near * far);
+    compressMatrix.set(3, 2, -1.0);
+    compressMatrix.set(3, 3, 0.0);
+
+    float halfHeight = near * std::tan(fovPI / 2);
+    float halfWidth = halfHeight * aspect;
+    Matrix4<float> orthoProject = Matrix4<float>::orthoProject(-halfWidth, halfWidth, -halfHeight, halfHeight, near, far);
+
+    return orthoProject * compressMatrix;
 }
 
 // Devices viewport matrix

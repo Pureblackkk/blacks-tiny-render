@@ -48,4 +48,11 @@ class OrthoCamera : public Camera {
             projectionMatrix = Matrix4f::orthoProject(left, right, bottom, top, near, far);
         };
 };
+
+class PerspectiveCamera : public Camera {
+    public:
+        PerspectiveCamera(float fov, float aspect, float near, float far) {
+            projectionMatrix = Matrix4f::perspectiveProject(fov, aspect, near, far);
+        };
+};
 #endif

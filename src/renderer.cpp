@@ -5,7 +5,7 @@
 Renderer::Renderer(int width, int height) {
     // Initial frame buffer and depth buffer
     frameBuffer = new Buffer<Vector4f>(width, height);
-    depthBuffer = new Buffer<float>(width, height);
+    depthBuffer = new Buffer<float>(width, height, 1.0);
 }
 
 Renderer::~Renderer() {
@@ -53,9 +53,6 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
             for (int j : {0, 1, 2}) {
                 vsa.vert = geo->vert(i, j);
                 vsa.tex_coord = geo->uv(i, j);
-                printf("%d, %d\n", i, j);
-                vsa.vert.print();
-                vsa.tex_coord.print();
                 clip_vert[j] = material->shader->vertex(vsa);
             }
 

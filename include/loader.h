@@ -6,11 +6,13 @@
 #include<vector2.h>
 #include<vector3.h>
 #include<geometry.h>
+#include<tgaimage.h>
 #include<fstream>
 
 class Loader {
     public:
-        static int loadGeometry(Geometry &geo, const std::string filename);
+        static bool loadGeometry(Geometry &geo, const std::string filename);
+        static bool loadTexture(TGAImage &img, const char *filename);
 };
 
 #endif
