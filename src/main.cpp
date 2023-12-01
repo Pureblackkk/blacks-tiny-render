@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     // OrthoCamera camera(-1.2, 1.2, -1.2, 1.2, 0.01, 100);
     PerspectiveCamera camera(60, 1.0, 0.01, 100);
     Renderer renderer(500, 500);
-    
+
     // Set camera position, up, look at
     camera.position(Vector3f(0.0, 1.0, 3.0));
     camera.lookat(Vector3f(0.0, 0.0, 0.0));
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     scene.add(mesh);
 
     // Define output path
-    renderer.render(scene, camera, "framebuffer.tga");
+    renderer.render(scene, camera);
 
 	return 0;
 }

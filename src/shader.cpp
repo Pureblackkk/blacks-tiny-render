@@ -36,7 +36,7 @@ class TextureShader : public Shader {
             Vector2f varyingTexCoord = tex_coord.getVarying(barycentricFactor);
 
             // Get texture color
-            return Shader::sample2D(uniform.normalTexture, varyingTexCoord);
+            return Shader::sample2D(uniform.defaultTexture, varyingTexCoord);
         }
 };
 

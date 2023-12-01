@@ -4,6 +4,7 @@
 
 Renderer::Renderer(int width, int height) {
     // Initial frame buffer and depth buffer
+    rSize = Vector2i(width, height);
     frameBuffer = new Buffer<Vector4f>(width, height);
     depthBuffer = new Buffer<float>(width, height, 1.0);
 }
@@ -11,6 +12,7 @@ Renderer::Renderer(int width, int height) {
 Renderer::~Renderer() {
     delete frameBuffer;
     delete depthBuffer;
+    delete sd2Gui;
 }
 
 // Offline render
@@ -22,7 +24,28 @@ void Renderer::render(Scene &scene, Camera &camera, std::string outputPath) {
     Displayer::offlineDraw(outputPath, frameBuffer);
 }
 
-// TODO: Realtime render
+// Realtime render
+void Renderer::render(Scene &scene, Camera &camera) {
+    // Init GUI for the first time render
+    if (!isRealTimeGUIOn) {
+        isRealTimeGUIOn = true;
+        sd2Gui = new SD2GUI();
+        bool failed = sd2Gui->init(rSize.x, rSize.y);
+        if (failed) return;
+
+        // Render meshes
+        Renderer::pRender(scene, camera);
+
+        // Output framebuffer to gui
+        Displayer::realTimeDraw(sd2Gui, frameBuffer);
+
+        // Update
+        sd2Gui->update();
+
+        // Start gui;
+        sd2Gui->start();
+    }
+}
 
 // Private render method
 void Renderer::pRender(Scene &scene, Camera &camera) {
@@ -39,7 +62,7 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
         // Set global shader variable
         material->shader->uniform.modelViewMatrix = camera.getViewMatrix();
         material->shader->uniform.projectionMatrix = camera.getProjectionMatrix();
-        material->shader->uniform.normalTexture = material->getDefaultTexture();
+        material->shader->uniform.defaultTexture = material->getDefaultTexture();
 
         // Loop geometry faces
         const int meshFaces = geo->nfaces();

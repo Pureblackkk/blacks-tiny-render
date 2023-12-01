@@ -6,11 +6,14 @@
 #include<vector3.h>
 #include<vector4.h>
 #include<matrix4.h>
+#include<light.h>
 
 struct UniformShaderVariable {
     Matrix4f modelViewMatrix;
     Matrix4f projectionMatrix;
-    TGAImage *normalTexture;
+    std::vector<Light*> *lights;
+    TGAImage *defaultTexture;
+    TGAImage *normTexture;
     // TODO: add light and other possible global shader variable
 };
 
