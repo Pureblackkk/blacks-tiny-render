@@ -28,6 +28,7 @@ class Matrix4 {
         // Transpose
         Matrix4<T> transpose() const;
         // TODO: inverse
+        Matrix4<T> inverse() const;
         // Set
         void set(int row, int col, T value);
         // Print
@@ -37,7 +38,7 @@ class Matrix4 {
         // Generate roate matrix
         Matrix4<float> static rotateMatrix(float alpha, float beta, float gamma);
         // Generate translate matrix
-        Matrix4<T> static translateMatrix(T dx, T dy, T dz);
+        Matrix4<float> static translateMatrix(T dx, T dy, T dz);
         // Generate transform matrix
         Matrix4<float> static transformMatrix(TransformParameters &transform);
         // Generate camera look at matrix
@@ -48,9 +49,13 @@ class Matrix4 {
         Matrix4<float> static perspectiveProject(float fov, float aspect, float near, float far);
         // Devices viewport matrix
         Matrix4<float> static deviceViewPort(float width, float height);
+        // Quaternion rotation matrix
+        Matrix4<float> static quaternionRotation(Vector4f q);
         void print() const;
     private:
         T matrix[4][4];
+        T[9] getSubMatrixArray(int exceptPositionX, int exceptPositionY);
+        T calculateLevel3Determinant(T subMatrix[9]);
 };
 
 // ===== Constructor
@@ -179,6 +184,65 @@ Matrix4<T> Matrix4<T>::transpose() const {
         }
     }
     return transposedMatrix;
+}
+
+// Inverse
+template <typename T>
+Matrix4<float> Matrix4<T>::inverse() const {
+    // Calculate determinant of four level matrix
+    T[9] submatrix0 = getSubMatrixArray(0, 0);
+    T[9] submatrix1 = getSubMatrixArray(0, 1);
+    T[9] submatrix2 = getSubMatrixArray(0, 2);
+    T[9] submatrix3 = getSubMatrixArray(0, 3);
+    T det = matrix[0][0] * calculateLevel3Determinant(submatrix0)
+    - matrix[0][1] * calculateLevel3Determinant(submatrix1)
+    + matrix[0][2] * calculateLevel3Determinant(submatrix2)
+    - matrix[0][3] * calculateLevel3Determinant(submatrix3);
+
+    Matrix4<float> adjMatrix;
+    for (int i = 0; i <= 3; i++) {
+        for (int j = 0; j <= 3; j++) {
+            float[9] subMatrix = getSubMatrixArray(i, j);
+            float val = std::pow(-1, i + j) * calculateLevel3Determinant(subMatrix);
+            adjMatrix.set(i, j, val);
+        }
+    }
+    
+    return adjMatrix.transpose() * (1 / det);
+}
+
+template <typename T>
+T Matrix4<T>::calculateLevel3Determinant(T &submatrix[9]) {
+    T sum0 = submatrix[0] * (
+        submatrix[4] * submatrix[8]
+        - submatrix[5] * submatrix[7]
+    );
+
+    T sum1 = -submatrix[1] * (
+        submatrix[3] * submatrix[8]
+        - submatrix[5] * submatrix[6]
+    );
+
+    T sum2 = submatrix[2] * (
+        submatrix[3] * submatrix[7]
+        - submatrix[4] * submatrix[6]
+    );
+    
+    return sum0 + sum1 + sum2;
+}
+
+template <typename T>
+T[9] Matrix4<T>::getSubMatrixArray(int exceptPositionX, int exceptPositionY) {
+    T[9] res;
+    int pos = 0;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (exceptPositionX == i && exceptPositionY == j) continue;
+            T[pos] = matrix[i][j];
+            pos++;
+        }
+    }
+    return res;
 }
 
 // Get matrix value
@@ -374,6 +438,35 @@ Matrix4<float> Matrix4<T>::deviceViewPort(float width, float height) {
     viewPortMatrix.set(1, 1, height / 2);
     viewPortMatrix.set(1, 3, height / 2);
     return viewPortMatrix;
+}
+
+// Quaternion rotation matrix
+template<typename T>
+Matrix4<float> Matrix4<T>::quaternionRotation(Vector4f q) {
+    Matrix4<float> rotationMatrix;
+    float x2 = q.x * q.x;
+    float y2 = q.y * q.y;
+    float z2 = q.z * q.z;
+    float xy = q.x * q.y;
+    float xz = q.x * q.z;
+    float yz = q.y * q.z;
+    float wx = q.w * q.x;
+    float wy = q.w * q.y;
+    float wz = q.w * q.z;
+
+    rotationMatrix.set(0, 0, 1 - 2 * y2 - 2 * z2);
+    rotationMatrix.set(0, 1, 2 * xy - 2 * wz);
+    rotationMatrix.set(0, 2, 2 * xz + 2 * wy);
+
+    rotationMatrix.set(1, 0, 2 * xy + 2 * wz);
+    rotationMatrix.set(1, 1, 1 - 2 * x2 - 2 * z2);
+    rotationMatrix.set(1, 2, 2 * yz - 2 * wx);
+
+    rotationMatrix.set(2, 0, 2 * xz - 2 * wy);
+    rotationMatrix.set(2, 1, 2 * yz + 2 * wx);
+    rotationMatrix.set(2, 2, 1 - 2 * x2 - 2 * y2);
+
+    return rotationMatrix;
 }
 
 typedef Matrix4<int> Matrix4i;

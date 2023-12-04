@@ -7,16 +7,16 @@
 
 class SD2GUI {
     public:
-        bool init(const int width, const int height);
-        void setPixel(const int x, const int y, const Vector4i &color);
-        void update();
-        void start();
-        void quit();
+        static bool init(const int width, const int height);
+        static void setPixel(const int x, const int y, const Vector4i &color);
+        static void update();
+        static bool isQuit();
+        static void quit();    
 
     private:
-        int pWidth;
-        int pHeight;
-        SDL_Window *window;
+        static int pWidth;
+        static int pHeight;
+        static SDL_Window *window;
 };
 
 #endif

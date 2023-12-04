@@ -12,7 +12,6 @@ Renderer::Renderer(int width, int height) {
 Renderer::~Renderer() {
     delete frameBuffer;
     delete depthBuffer;
-    delete sd2Gui;
 }
 
 // Offline render
@@ -26,25 +25,11 @@ void Renderer::render(Scene &scene, Camera &camera, std::string outputPath) {
 
 // Realtime render
 void Renderer::render(Scene &scene, Camera &camera) {
-    // Init GUI for the first time render
-    if (!isRealTimeGUIOn) {
-        isRealTimeGUIOn = true;
-        sd2Gui = new SD2GUI();
-        bool failed = sd2Gui->init(rSize.x, rSize.y);
-        if (failed) return;
+    // Render meshes
+    Renderer::pRender(scene, camera);
 
-        // Render meshes
-        Renderer::pRender(scene, camera);
-
-        // Output framebuffer to gui
-        Displayer::realTimeDraw(sd2Gui, frameBuffer);
-
-        // Update
-        sd2Gui->update();
-
-        // Start gui;
-        sd2Gui->start();
-    }
+    // Output framebuffer to gui
+    Displayer::realTimeDraw(frameBuffer);
 }
 
 // Private render method
@@ -54,7 +39,6 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
 
     // Render meshes 
     for(Mesh* mesh : meshes) {
-        printf("meshhhhh\n");
         // Get mesh geometry and material
         Geometry *geo = mesh->geo;
         Material *material = mesh->material;

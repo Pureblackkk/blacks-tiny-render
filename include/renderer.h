@@ -17,12 +17,10 @@ class Renderer {
         // TODO: check the value type for frame buffer
         Buffer<Vector4f> *frameBuffer;
         Buffer<float> *depthBuffer;
-        SD2GUI* sd2Gui;
         Vector2i rSize;
         bool clipFaces(Vector4f (&clip_vert)[3]);
         void homogeneousnDivided(Vector4f (&clip_vert)[3]);
         void pRender(Scene &scene, Camera &camera);
-        bool isRealTimeGUIOn = false;
 };
 
 #endif

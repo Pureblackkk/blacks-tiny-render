@@ -12,12 +12,15 @@
 using namespace std;
 using std::cout;
 
+
 int main(int argc, char** argv) {
+    const int screenWidth = 1000;
+    const int screenHeight = 1000;
     // Initit scene, camera, renderer
     Scene scene;
     // OrthoCamera camera(-1.2, 1.2, -1.2, 1.2, 0.01, 100);
     PerspectiveCamera camera(60, 1.0, 0.01, 100);
-    Renderer renderer(500, 500);
+    Renderer renderer(screenWidth, screenHeight);
 
     // Set camera position, up, look at
     camera.position(Vector3f(0.0, 1.0, 3.0));
@@ -43,8 +46,13 @@ int main(int argc, char** argv) {
     // Add mesh to scene
     scene.add(mesh);
 
-    // Define output path
-    renderer.render(scene, camera);
+    // Animation start
+    SD2GUI::init(screenWidth, screenHeight);
+    while(!SD2GUI::isQuit()) {
+        renderer.render(scene, camera);
+        SD2GUI::update();
+    }
+    SD2GUI::quit();
 
 	return 0;
 }
