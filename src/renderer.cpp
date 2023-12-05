@@ -30,6 +30,10 @@ void Renderer::render(Scene &scene, Camera &camera) {
 
     // Output framebuffer to gui
     Displayer::realTimeDraw(frameBuffer);
+
+    // Clean the buffer
+    frameBuffer->clean();
+    depthBuffer->clean(1.0);
 }
 
 // Private render method

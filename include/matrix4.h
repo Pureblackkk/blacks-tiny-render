@@ -28,7 +28,7 @@ class Matrix4 {
         // Transpose
         Matrix4<T> transpose() const;
         // TODO: inverse
-        Matrix4<T> inverse() const;
+        Matrix4<float> inverse() const;
         // Set
         void set(int row, int col, T value);
         // Print
@@ -38,7 +38,7 @@ class Matrix4 {
         // Generate roate matrix
         Matrix4<float> static rotateMatrix(float alpha, float beta, float gamma);
         // Generate translate matrix
-        Matrix4<float> static translateMatrix(T dx, T dy, T dz);
+        Matrix4<T> static translateMatrix(T dx, T dy, T dz);
         // Generate transform matrix
         Matrix4<float> static transformMatrix(TransformParameters &transform);
         // Generate camera look at matrix
@@ -54,8 +54,8 @@ class Matrix4 {
         void print() const;
     private:
         T matrix[4][4];
-        T[9] getSubMatrixArray(int exceptPositionX, int exceptPositionY);
-        T calculateLevel3Determinant(T subMatrix[9]);
+        T* getSubMatrixArray(int exceptPositionX, int exceptPositionY) const;
+        T calculateLevel3Determinant(T subMatrix[9]) const;
 };
 
 // ===== Constructor
@@ -190,19 +190,26 @@ Matrix4<T> Matrix4<T>::transpose() const {
 template <typename T>
 Matrix4<float> Matrix4<T>::inverse() const {
     // Calculate determinant of four level matrix
-    T[9] submatrix0 = getSubMatrixArray(0, 0);
-    T[9] submatrix1 = getSubMatrixArray(0, 1);
-    T[9] submatrix2 = getSubMatrixArray(0, 2);
-    T[9] submatrix3 = getSubMatrixArray(0, 3);
+    T* submatrix0 = getSubMatrixArray(0, 0);
+    T* submatrix1 = getSubMatrixArray(0, 1);
+    T* submatrix2 = getSubMatrixArray(0, 2);
+    T* submatrix3 = getSubMatrixArray(0, 3);
+
     T det = matrix[0][0] * calculateLevel3Determinant(submatrix0)
     - matrix[0][1] * calculateLevel3Determinant(submatrix1)
     + matrix[0][2] * calculateLevel3Determinant(submatrix2)
     - matrix[0][3] * calculateLevel3Determinant(submatrix3);
 
+    // If determination equals 0 return identity matrix
+    if (abs(det) < 1e-6) {
+        Matrix4<float> identity;
+        return identity;
+    }
+
     Matrix4<float> adjMatrix;
     for (int i = 0; i <= 3; i++) {
         for (int j = 0; j <= 3; j++) {
-            float[9] subMatrix = getSubMatrixArray(i, j);
+            float* subMatrix = getSubMatrixArray(i, j);
             float val = std::pow(-1, i + j) * calculateLevel3Determinant(subMatrix);
             adjMatrix.set(i, j, val);
         }
@@ -212,7 +219,7 @@ Matrix4<float> Matrix4<T>::inverse() const {
 }
 
 template <typename T>
-T Matrix4<T>::calculateLevel3Determinant(T &submatrix[9]) {
+T Matrix4<T>::calculateLevel3Determinant(T* submatrix) const {
     T sum0 = submatrix[0] * (
         submatrix[4] * submatrix[8]
         - submatrix[5] * submatrix[7]
@@ -227,18 +234,18 @@ T Matrix4<T>::calculateLevel3Determinant(T &submatrix[9]) {
         submatrix[3] * submatrix[7]
         - submatrix[4] * submatrix[6]
     );
-    
+
     return sum0 + sum1 + sum2;
 }
 
 template <typename T>
-T[9] Matrix4<T>::getSubMatrixArray(int exceptPositionX, int exceptPositionY) {
-    T[9] res;
+T* Matrix4<T>::getSubMatrixArray(int exceptPositionX, int exceptPositionY) const {
+    T* res = new T[9];
     int pos = 0;
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (exceptPositionX == i && exceptPositionY == j) continue;
-            T[pos] = matrix[i][j];
+    for (int i = 0; i <= 3; i++) {
+        for (int j = 0; j <= 3; j++) {
+            if (exceptPositionX == i || exceptPositionY == j) continue;
+            res[pos] = matrix[i][j];
             pos++;
         }
     }

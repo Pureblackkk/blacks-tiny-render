@@ -10,6 +10,7 @@ class Buffer {
         T get(int x, int y) const;
         int size() const;
         void clean();
+        void clean(T val);
         int width() const;
         int height() const;
 
@@ -57,6 +58,21 @@ template<typename T>
 int Buffer<T>::size() const {
     return bSize;
 }
+
+template<typename T>
+void Buffer<T>::clean() {
+    for(int i = 0; i < bSize; i++) {
+        buffer[i] = T();
+    }
+}
+
+template<typename T>
+void Buffer<T>::clean(T val) {
+    for(int i = 0; i < bSize; i++) {
+        buffer[i] = T(val);
+    }
+}
+
 
 template<typename T>
 int Buffer<T>::width() const {

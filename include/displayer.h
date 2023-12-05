@@ -39,7 +39,7 @@ class Displayer {
         void static realTimeDraw(Buffer<Vector4f> *frameBuffer) {
             int width = frameBuffer->width();
             int height = frameBuffer->height();
-
+            
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
                     Vector4f frameColor = frameBuffer->get(i, j);
@@ -48,7 +48,7 @@ class Displayer {
                     int g = static_cast<int>(frameColor.y);
                     int b = static_cast<int>(frameColor.z);
                     int alpha = static_cast<int>(frameColor.w);
-                    if (r == 0 && g == 0 && b == 0 && alpha == 0) continue;
+                    // if (r == 0 && g == 0 && b == 0 && alpha == 0) continue;
                     SD2GUI::setPixel(i, j, Vector4i(r, g, b, alpha));
                 }
             }

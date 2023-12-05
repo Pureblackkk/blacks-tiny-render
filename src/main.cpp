@@ -8,6 +8,7 @@
 #include<scene.h>
 #include<camera.h>
 #include<mesh.h>
+#include<orbitControl.h>
 
 using namespace std;
 using std::cout;
@@ -26,6 +27,9 @@ int main(int argc, char** argv) {
     camera.position(Vector3f(0.0, 1.0, 3.0));
     camera.lookat(Vector3f(0.0, 0.0, 0.0));
     camera.up(Vector3f(0.0, 1.0, 0.0));
+
+    // Add oribit control
+    OribitControl orbitControl(camera);
     
     // Load geometry 1
     Geometry geo;
@@ -47,8 +51,8 @@ int main(int argc, char** argv) {
     scene.add(mesh);
 
     // Animation start
-    SD2GUI::init(screenWidth, screenHeight);
-    while(!SD2GUI::isQuit()) {
+    SD2GUI::init(screenWidth, screenHeight, &orbitControl);
+    while(SD2GUI::loop()) {
         renderer.render(scene, camera);
         SD2GUI::update();
     }
