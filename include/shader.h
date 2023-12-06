@@ -10,6 +10,7 @@
 #include<vector>
 
 struct UniformShaderVariable {
+    Vector3f eye;
     Matrix4f modelMatrix;
     Matrix4f viewMatrix;
     Matrix4f modelViewMatrix;

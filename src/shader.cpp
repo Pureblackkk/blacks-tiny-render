@@ -44,6 +44,9 @@ class BlinnPhongShader : public Shader {
     ShaderVarying<Vector2f> tex_coord;
     ShaderVarying<Vector3f> modelPos;
     ShaderVarying<Vector3f> normal;
+    float shininess = 16.0;
+    float diffusionRatio = 0.1;
+    float specularRatio = 0.3;
 
     public:
         Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
@@ -77,19 +80,30 @@ class BlinnPhongShader : public Shader {
             // Get diffusion intensity
             float diffusion = diffuseIntensity(lightDir, modelNorm);
 
+            // Calculate specular color
+            Vector3f eyeModelPos = (modelMatrixInverse * Vector4f(uniform.eye, 1.0)).vectorThree();
+            Vector3f eyeDir = eyeModelPos - pixelModelPos;
+            float specular = specularIntensity(lightDir, eyeDir, modelNorm);
+
             // Get texture color
             Vector2f varyingTexCoord = tex_coord.getVarying(barycentricFactor);
             Vector4f textureColor = Shader::sample2D(uniform.defaultTexture, varyingTexCoord);
 
-            // Mix diffuse color and texture color
-            float mixFactor = 0.2;
-            Vector4f finalColor = textureColor * (1 - mixFactor) 
-                + Vector4f(uniform.lights->front()->color(), 1.0) * mixFactor * diffusion;
+            // Mix diffuse color, texture color, specular color
+            float rate = specularRatio * specular + diffusionRatio * diffusion;
+            Vector4f finalColor = textureColor * (1 - rate) 
+                + Vector4f(uniform.lights->front()->color(), 1.0) * rate;
             
             return finalColor;
         }
     
     private:
+        // Calculate specture intensity
+        float specularIntensity(Vector3f &lightDir, Vector3f &eyeDir, Vector3f &normal) {
+            Vector3f half = (lightDir + eyeDir).normalized();
+            return std::pow(std::max(0.0f, half.dot(normal)), shininess);
+        }
+
         // Calculate diffusion intensity
         float diffuseIntensity(Vector3f &lightDir, Vector3f &normal) {
             return std::max(0.0f, lightDir.dot(normal));
