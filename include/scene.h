@@ -1,8 +1,8 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include<vector>
 #include<mesh.h>
+#include<vector>
 
 class Scene {
     public:

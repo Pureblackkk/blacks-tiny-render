@@ -4,11 +4,14 @@
 #include<vector3.h>
 
 enum LightType {
-    POINT,
+    POINT_LIGHT,
 };
 
 class Light {
     public:
+        void position(float x, float y, float z) {
+            positionV = Vector3f(x, y, z);
+        };
         void position(Vector3f iPosition) {
             positionV = iPosition;
         };
@@ -17,6 +20,9 @@ class Light {
         };
         void color(Vector3f icolor) {
             colorV = icolor;
+        };
+        void color(float r, float g, float b) {
+            colorV = Vector3f(r, g, b);
         };
         Vector3f color() {
             return colorV;

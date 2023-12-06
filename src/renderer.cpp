@@ -41,6 +41,9 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
     // Get meshes for render
     std::vector<Mesh*> meshes = scene.getMeshes();
 
+    // Get lights for render
+    std::vector<Light*> *lights = scene.getLights();
+
     // Render meshes 
     for(Mesh* mesh : meshes) {
         // Get mesh geometry and material
@@ -48,9 +51,12 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
         Material *material = mesh->material;
 
         // Set global shader variable
-        material->shader->uniform.modelViewMatrix = camera.getViewMatrix();
+        material->shader->uniform.modelMatrix = mesh->modelMatrix();
+        material->shader->uniform.viewMatrix = camera.getViewMatrix();
+        material->shader->uniform.modelViewMatrix = camera.getViewMatrix() * mesh->modelMatrix();
         material->shader->uniform.projectionMatrix = camera.getProjectionMatrix();
         material->shader->uniform.defaultTexture = material->getDefaultTexture();
+        material->shader->uniform.lights = lights;
 
         // Loop geometry faces
         const int meshFaces = geo->nfaces();
@@ -62,8 +68,11 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
 
             // Loop each verteice in this face
             for (int j : {0, 1, 2}) {
+                // Set vertex shader variable
                 vsa.vert = geo->vert(i, j);
                 vsa.tex_coord = geo->uv(i, j);
+                vsa.norm = geo->normal(i, j);
+
                 clip_vert[j] = material->shader->vertex(vsa);
             }
 

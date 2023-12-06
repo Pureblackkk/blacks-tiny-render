@@ -13,17 +13,26 @@ class Camera {
         void position(const Vector3f p) {
             posV = p;
         };
+        void position(float x, float y, float z) {
+            posV = Vector3f(x, y, z);
+        };
         Vector3f lookat() const {
             return lookV;
         };
         void lookat(const Vector3f l) {
             lookV = l;
         };
+        void lookat(float x, float y, float z) {
+            lookV = Vector3f(x, y, z);
+        };
         Vector3f up() const {
             return upV;
         };
         void up(const Vector3f u) {
             upV = u;
+        };
+        void up(float x, float y, float z) {
+            upV = Vector3f(x, y, z);
         };
         // Calculate view matrix
         Matrix4f getViewMatrix() {

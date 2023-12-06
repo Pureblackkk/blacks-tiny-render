@@ -7,8 +7,11 @@
 #include<vector4.h>
 #include<matrix4.h>
 #include<light.h>
+#include<vector>
 
 struct UniformShaderVariable {
+    Matrix4f modelMatrix;
+    Matrix4f viewMatrix;
     Matrix4f modelViewMatrix;
     Matrix4f projectionMatrix;
     std::vector<Light*> *lights;
@@ -55,4 +58,5 @@ class Shader {
 
 extern Shader *SIMPLE_SHADER;
 extern Shader *TEXTURE_SHADER;
+extern Shader *BLINNPHONE_SHADER;
 #endif

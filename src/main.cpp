@@ -8,6 +8,7 @@
 #include<scene.h>
 #include<camera.h>
 #include<mesh.h>
+#include<light.h>
 #include<orbitControl.h>
 
 using namespace std;
@@ -24,13 +25,13 @@ int main(int argc, char** argv) {
     Renderer renderer(screenWidth, screenHeight);
 
     // Set camera position, up, look at
-    camera.position(Vector3f(0.0, 1.0, 3.0));
-    camera.lookat(Vector3f(0.0, 0.0, 0.0));
-    camera.up(Vector3f(0.0, 1.0, 0.0));
+    camera.position(0.0, 1.0, 3.0);
+    camera.lookat(0.0, 0.0, 0.0);
+    camera.up(0.0, 1.0, 0.0);
 
     // Add oribit control
     OribitControl orbitControl(camera);
-    
+
     // Load geometry 1
     Geometry geo;
     // std::string path = "../obj/floor/floor.obj";
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
     Loader::loadGeometry(geo, path);
 
     // Define material
-    Material material(TEXTURE_SHADER);
+    Material material(BLINNPHONE_SHADER);
     TGAImage defaultTexture;
     // defaultTexture.read_tga_file("../obj/floor/floor.tga");
     Loader::loadTexture(defaultTexture, "../obj/diablo3_pose/diablo3_pose_diffuse.tga");
@@ -47,8 +48,22 @@ int main(int argc, char** argv) {
     // Combine geometry and material to generate mesh
     Mesh mesh(geo, material);
 
+    // Set mesh rotate and scale
+    mesh.position(-0.5, 0.0, 0.0);
+    mesh.rotate(0.1, 0.0, 0.0);
+    mesh.scale(0.5, 0.5, 0.5);
+
+
+    // Init light
+    Light light;
+    light.position(10.0, 10.0, 10.0);
+    light.color(0.0, 1.0, 0.0);
+
     // Add mesh to scene
     scene.add(mesh);
+
+    // Add light to scene
+    scene.add(light);
 
     // Animation start
     SD2GUI::init(screenWidth, screenHeight, &orbitControl);

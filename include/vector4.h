@@ -3,9 +3,8 @@
 
 #include<string>
 #include<cmath>
-#include<vector2.h>
 #include<vector3.h>
-
+#include<vector2.h>
 template <typename T>
 class Vector4 {
     public:
@@ -40,6 +39,8 @@ class Vector4 {
         Vector4<T> &normalized();
         // Zero
         void zero();
+        // Get vector3
+        Vector3<T> vectorThree();
         // Print
         void print() const;
 };
@@ -189,6 +190,12 @@ void Vector4<T>::zero() {
     y = 0;
     z = 0;
     w = 0;
+}
+
+// Get vector 3
+template <typename T>
+Vector3<T> Vector4<T>::vectorThree() {
+    return Vector3<T>(x, y, z);
 }
 
 // Print
