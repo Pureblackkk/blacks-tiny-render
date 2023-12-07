@@ -200,6 +200,12 @@ Matrix4<float> Matrix4<T>::inverse() const {
     + matrix[0][2] * calculateLevel3Determinant(submatrix2)
     - matrix[0][3] * calculateLevel3Determinant(submatrix3);
 
+    // Release memory
+    delete[] submatrix0;
+    delete[] submatrix1;
+    delete[] submatrix2;
+    delete[] submatrix3;
+
     // If determination equals 0 return identity matrix
     if (abs(det) < 1e-6) {
         Matrix4<float> identity;
@@ -211,10 +217,12 @@ Matrix4<float> Matrix4<T>::inverse() const {
         for (int j = 0; j <= 3; j++) {
             float* subMatrix = getSubMatrixArray(i, j);
             float val = std::pow(-1, i + j) * calculateLevel3Determinant(subMatrix);
+            
+            delete[] subMatrix;
             adjMatrix.set(i, j, val);
         }
     }
-    
+
     return adjMatrix.transpose() * (1 / det);
 }
 

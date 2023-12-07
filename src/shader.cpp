@@ -65,7 +65,7 @@ class BlinnPhongShader : public Shader {
 
         Vector4f fragment() override {
             Matrix4f modelMatrixInverse = uniform.modelMatrix.inverse();
-
+            
             // Calculate diffusion color
             // Get light position in model space (here only use the first light)
             Vector3f lightPos = uniform.lights->front()->position();
@@ -93,7 +93,7 @@ class BlinnPhongShader : public Shader {
             float rate = specularRatio * specular + diffusionRatio * diffusion;
             Vector4f finalColor = textureColor * (1 - rate) 
                 + Vector4f(uniform.lights->front()->color(), 1.0) * rate;
-            
+
             return finalColor;
         }
     
