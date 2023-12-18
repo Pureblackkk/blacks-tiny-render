@@ -1,6 +1,7 @@
 #include<renderer.h>
 #include<displayer.h>
 #include<rasterizer.h>
+#include<omp.h>
 
 Renderer::Renderer(int width, int height) {
     // Initial frame buffer and depth buffer
@@ -62,6 +63,7 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
         // Loop geometry faces
         const int meshFaces = geo->nfaces();
 
+#pragma omp parallel for num_threads(20)
         for (int i = 0; i < meshFaces; i++) {
             // Initialize vertex shader variable
             VertexShaderVariable vsa;

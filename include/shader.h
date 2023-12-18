@@ -49,11 +49,10 @@ struct ShaderVarying {
 
 class Shader {
     public:
-        Vector3f barycentricFactor;
         UniformShaderVariable uniform;
         virtual ~Shader() {};
         virtual Vector4f vertex(VertexShaderVariable &vertexShaderVariable) = 0;
-        virtual Vector4f fragment() = 0;
+        virtual Vector4f fragment(Vector3f &barycentricFactor) = 0;
         static Vector4f sample2D(TGAImage *img, const Vector2f uv);
 };
 

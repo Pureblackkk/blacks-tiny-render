@@ -13,7 +13,7 @@ class SimpleShader : public Shader {
             return uniform.projectionMatrix * uniform.modelViewMatrix * position;
         }
 
-        Vector4f fragment() override {
+        Vector4f fragment(Vector3f &barycentricFactor) override {
             // Return color red with alpha 1.0;
             return Vector4f(1.0, 0.0, 0.0, 1.0);
         }
@@ -31,7 +31,7 @@ class TextureShader : public Shader {
             return uniform.projectionMatrix * uniform.modelViewMatrix * position;
         }
 
-        Vector4f fragment() override {
+        Vector4f fragment(Vector3f &barycentricFactor) override {
             // Get texture_coord
             Vector2f varyingTexCoord = tex_coord.getVarying(barycentricFactor);
 
@@ -63,7 +63,7 @@ class BlinnPhongShader : public Shader {
             return uniform.projectionMatrix * uniform.modelViewMatrix * position;
         }
 
-        Vector4f fragment() override {
+        Vector4f fragment(Vector3f &barycentricFactor) override {
             Matrix4f modelMatrixInverse = uniform.modelMatrix.inverse();
             
             // Calculate diffusion color

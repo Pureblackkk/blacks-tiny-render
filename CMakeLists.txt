@@ -14,8 +14,41 @@ find_package(SDL2 REQUIRED)
 
 # Inclue directories 
 include_directories(include libs ${SDL_DIR}/include/)
-
 link_directories(${SDL_DIR}/lib/)
+
+# Set OpenMP compiler
+message(STATUS "set compipler")
+set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/llvm/17.0.6/bin/clang")
+set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/llvm/17.0.6/bin/clang++")
+set(OPENMP_LIBRARIES "/opt/homebrew/Cellar/llvm/17.0.6/lib")
+set(OPENMP_INCLUDES "/opt/homebrew/Cellar/llvm/17.0.6/include")
+set(OpenMP_OMP "/opt/homebrew/Cellar/llvm/17.0.6/lib/libomp.dylib") # Set omp position
+
+if(APPLE)
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_C_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY ${OpenMP_OMP})
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY ${OpenMP_OMP})
+    endif()
+endif()
+
+# Find OpenMP
+find_package(OpenMP REQUIRED)
+if(OpenMP_CXX_FOUND)
+    message(STATUS "found openmp")
+    include_directories("${OPENMP_INCLUDES}")
+    link_directories(${OPENMP_LIBRARIES})
+    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS}, ${OPENMP_C_FLAGS})
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OPENMP_CXX_FLAGS})
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+else()
+    message(FATAL_ERROR "openmp not found")
+endif()
 
 # Source files
 file(GLOB SOURCES
@@ -29,5 +62,5 @@ file(GLOB SOURCES
 # Add the executable
 add_executable(blacks_tiny_render ${SOURCES})
 
-# Link SDL2
-target_link_libraries(blacks_tiny_render SDL2)
+# Link SDL2 OpenMp
+target_link_libraries(blacks_tiny_render SDL2 OpenMP::OpenMP_CXX)

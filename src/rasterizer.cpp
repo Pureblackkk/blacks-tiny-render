@@ -57,8 +57,8 @@ void Rasterizer::triangle(
             if(zDpeth > depthBuffer->get(i, j) || zDpeth > 1.0) continue;
 
             // Set shader barycentricFactor
-            shader->barycentricFactor = Vector3f(area.x, area.y, area.z);
-            Vector4f color = shader->fragment();
+            Vector3f barycentricFactorVec(area.x, area.y, area.z);
+            Vector4f color = shader->fragment(barycentricFactorVec);
             
             // Set depth buffer
             depthBuffer->set(i, j, zDpeth);
