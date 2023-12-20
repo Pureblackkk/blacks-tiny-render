@@ -4,6 +4,8 @@ int SD2GUI::pWidth = 0;
 int SD2GUI::pHeight = 0;
 OribitControl* SD2GUI::pOrbitControl = nullptr;
 SDL_Window* SD2GUI::window = nullptr;
+SDL_Surface* SD2GUI::surface = nullptr;
+SDL_PixelFormat* SD2GUI::pPixelFormat = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
 
 bool SD2GUI::init(const int width, const int height, OribitControl *orbitControl) {
     if (SDL_Init(SDL_INIT_EVERYTHING)) {
@@ -15,17 +17,25 @@ bool SD2GUI::init(const int width, const int height, OribitControl *orbitControl
         "sdl2gui",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED, width, height,
-        SDL_WINDOW_ALLOW_HIGHDPI
+        0
     );
-
+    
     if (window == NULL) {
         std::cout << "SDL could not create window with error: " <<  SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    surface = SDL_GetWindowSurface(window);
+    
+    if (surface == NULL) {
+        std::cout << "SDL could not create surface from window: " <<  SDL_GetError() << std::endl;
         return 1;
     }
 
     pWidth = width;
     pHeight = height;
     pOrbitControl = orbitControl;
+    pPixelFormat = surface -> format;
 
     return 0;
 }
@@ -36,17 +46,45 @@ void SD2GUI::setPixel(int x, int y, const Vector4i &color) {
     y = pHeight - 1 - y;
 
     // Get window surface
-    SDL_Surface* surface = SDL_GetWindowSurface(window);
     Uint32* pixels = static_cast<Uint32*>(surface->pixels);
 
     // Set color
-    Uint32 pixelColor = SDL_MapRGBA(surface->format, color.x, color.y, color.z, color.w);
-    // TOOD: figure out why
-    pixels[y * pWidth * 4 + x * 2] = pixelColor;
+    Uint32 pixelColor = SDL_MapRGBA(pPixelFormat, color.x, color.y, color.z, color.w);
+
+
+    pixels[y * pWidth + x] = pixelColor;
+}
+
+void SD2GUI::setPixel(int x, int y, Uint32 &pixelColor) {
+    Uint32* pixels = static_cast<Uint32*>(surface->pixels);
+    pixels[y * pWidth + x] = pixelColor;
+}
+
+void SD2GUI::setBuffer(Buffer<Uint32> *buffer) {
+    Uint32* pixels = static_cast<Uint32*>(surface->pixels);
+
+    // Copy buffer 
+    memcpy(pixels, buffer->get(), buffer->width() * buffer->height() * buffer->typeBytes());
+}
+
+Uint32 SD2GUI::mapRGBA(Vector4f &color) {
+    color *= 255.0f;
+    int r = static_cast<int>(color.x);
+    int g = static_cast<int>(color.y);
+    int b = static_cast<int>(color.z);
+    int alpha = static_cast<int>(color.w);
+
+    Uint32 pixelColor = SDL_MapRGBA(pPixelFormat, r, g, b, alpha);
+    return pixelColor;
+}
+
+Vector4i SD2GUI::getRGBA(Uint32 &color) {
+    Uint8 originalR, originalG, originalB, originalA;
+    SDL_GetRGBA(color, pPixelFormat, &originalR, &originalG, &originalB, &originalA);
+    return Vector4i(originalR, originalG, originalB, originalA);
 }
 
 void SD2GUI::clean() {
-    SDL_Surface* surface = SDL_GetWindowSurface(window);
     SDL_FillRect(surface, NULL, 0);
 }
 
@@ -92,6 +130,10 @@ bool SD2GUI::loop() {
 void SD2GUI::quit() {
     SDL_DestroyWindow(window);
     SDL_Quit();
+}
+
+SDL_PixelFormat* SD2GUI::pixelFormat() {
+    return pPixelFormat;
 }
 
 void SD2GUI::mouseUp() {

@@ -450,7 +450,8 @@ Matrix4<float> Matrix4<T>::deviceViewPort(float width, float height) {
     Matrix4<float> viewPortMatrix;
     viewPortMatrix.set(0, 0, width / 2);
     viewPortMatrix.set(0, 3, width / 2);
-    viewPortMatrix.set(1, 1, height / 2);
+    // Make the origial point upper left
+    viewPortMatrix.set(1, 1, -height / 2);
     viewPortMatrix.set(1, 3, height / 2);
     return viewPortMatrix;
 }

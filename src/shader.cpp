@@ -3,6 +3,7 @@
 Vector4f Shader::sample2D(TGAImage *img, const Vector2f uv) {
     TGAColor color = img->get(uv.x * img->get_width(), uv.y * img->get_height());
     Vector4f sampledColor = Vector4f(color.r, color.g, color.b, color.a) * (1 / 255.0f);
+    sampledColor.w = 1;
     return sampledColor;
 }
 

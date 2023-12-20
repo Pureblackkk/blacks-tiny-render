@@ -15,7 +15,7 @@ class Renderer {
 
     private:
         // TODO: check the value type for frame buffer
-        Buffer<Vector4f> *frameBuffer;
+        Buffer<Uint32> *frameBuffer;
         Buffer<float> *depthBuffer;
         Vector2i rSize;
         bool clipFaces(Vector4f (&clip_vert)[3]);

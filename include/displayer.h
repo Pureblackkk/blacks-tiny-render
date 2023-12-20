@@ -9,7 +9,7 @@
 
 class Displayer {
     public:
-        void static offlineDraw(std::string path, Buffer<Vector4f> *frameBuffer) {
+        void static offlineDraw(std::string path, Buffer<Uint32> *frameBuffer) {
             int width = frameBuffer->width();
             int height = frameBuffer->height();
 
@@ -17,14 +17,22 @@ class Displayer {
 
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
-                    Vector4f frameColor = frameBuffer->get(i, j);
-                    frameColor *= 255.0f;
-                    int r = static_cast<int>(frameColor.x);
-                    int g = static_cast<int>(frameColor.y);
-                    int b = static_cast<int>(frameColor.z);
-                    int alpha = static_cast<int>(frameColor.w);
-                    if (r == 0 && g == 0 && b == 0 && alpha == 0) continue;
-                    TGAColor color = TGAColor(r, g, b, alpha);
+                    Uint32 frameColor = frameBuffer->get(i, j);
+                    Vector4i frameColorRGBA =  SD2GUI::getRGBA(frameColor);
+                    if (
+                        frameColorRGBA.x == 0 
+                        && frameColorRGBA.y == 0 
+                        && frameColorRGBA.z == 0 
+                        && frameColorRGBA.w == 0
+                    ) continue;
+
+                    TGAColor color = TGAColor(
+                        frameColorRGBA.x,
+                        frameColorRGBA.y,
+                        frameColorRGBA.z,
+                        frameColorRGBA.w
+                    );
+
                     image.set(i, j, color);
                 }
             }
@@ -36,22 +44,21 @@ class Displayer {
             image.write_tga_file(path.c_str());
         }
 
-        void static realTimeDraw(Buffer<Vector4f> *frameBuffer) {
+        void static realTimeDraw(Buffer<Uint32> *frameBuffer) {
             int width = frameBuffer->width();
             int height = frameBuffer->height();
-            
+
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
-                    Vector4f frameColor = frameBuffer->get(i, j);
-                    frameColor *= 255.0f;
-                    int r = static_cast<int>(frameColor.x);
-                    int g = static_cast<int>(frameColor.y);
-                    int b = static_cast<int>(frameColor.z);
-                    int alpha = static_cast<int>(frameColor.w);
                     // if (r == 0 && g == 0 && b == 0 && alpha == 0) continue;
-                    SD2GUI::setPixel(i, j, Vector4i(r, g, b, alpha));
+                    Uint32 pixelColor = frameBuffer->get(i, j);
+                    SD2GUI::setPixel(i, j, pixelColor);
                 }
             }
+        }
+
+        void static realTimeDrawMem(Buffer<Uint32> *frameBuffer) {
+            SD2GUI::setBuffer(frameBuffer);
         }
 };
 

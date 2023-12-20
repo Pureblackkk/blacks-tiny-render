@@ -6,7 +6,7 @@
 Renderer::Renderer(int width, int height) {
     // Initial frame buffer and depth buffer
     rSize = Vector2i(width, height);
-    frameBuffer = new Buffer<Vector4f>(width, height);
+    frameBuffer = new Buffer<Uint32>(width, height);
     depthBuffer = new Buffer<float>(width, height, 1.0);
 }
 
@@ -28,8 +28,8 @@ void Renderer::render(Scene &scene, Camera &camera, std::string outputPath) {
 void Renderer::render(Scene &scene, Camera &camera) {
     // Render meshes
     Renderer::pRender(scene, camera);
-
-    // Output framebuffer to gui
+    
+    // Change framebuffer render
     Displayer::realTimeDraw(frameBuffer);
 
     // Clean the buffer
@@ -63,7 +63,6 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
         // Loop geometry faces
         const int meshFaces = geo->nfaces();
 
-#pragma omp parallel for num_threads(20)
         for (int i = 0; i < meshFaces; i++) {
             // Initialize vertex shader variable
             VertexShaderVariable vsa;

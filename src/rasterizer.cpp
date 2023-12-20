@@ -3,7 +3,7 @@
 void Rasterizer::triangle(
     Vector4f (&clip_vert)[3],
     Shader *shader,
-    Buffer<Vector4f> *frameBuffer,
+    Buffer<Uint32> *frameBuffer,
     Buffer<float> *depthBuffer
 ) {
     // Define frame size vector width, height
@@ -59,11 +59,13 @@ void Rasterizer::triangle(
             // Set shader barycentricFactor
             Vector3f barycentricFactorVec(area.x, area.y, area.z);
             Vector4f color = shader->fragment(barycentricFactorVec);
-            
+            Uint32 mappedColor = SD2GUI::mapRGBA(color);
+
             // Set depth buffer
             depthBuffer->set(i, j, zDpeth);
+
             // Set frame buffer
-            frameBuffer->set(i, j, color);
+            frameBuffer->set(i, j, mappedColor);
         }
     }
 }
@@ -71,7 +73,7 @@ void Rasterizer::triangle(
 void Rasterizer::triangleBoundingBox(
     Vector2f (&clip_vert)[3],
     Vector4i &boundingBox,
-    Buffer<Vector4f>* frameBuffer
+    Buffer<Uint32>* frameBuffer
 ) {
     for(int i = 0; i < 3; ++i) {
         // x min
