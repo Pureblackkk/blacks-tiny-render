@@ -27,20 +27,20 @@ TGAImage::~TGAImage() {
 	if (data) delete [] data;
 }
 
-TGAImage & TGAImage::operator =(const TGAImage &img) {
+TGAImage & TGAImage::operator=(Image &img) {
 	if (this != &img) {
 		if (data) delete [] data;
-		width  = img.width;
-		height = img.height;
-		bytespp = img.bytespp;
+		width  = img.get_width();
+		height = img.get_height();
+		bytespp = img.get_bytespp();
 		unsigned long nbytes = width*height*bytespp;
 		data = new unsigned char[nbytes];
-		memcpy(data, img.data, nbytes);
+		memcpy(data, img.buffer(), nbytes);
 	}
 	return *this;
 }
 
-bool TGAImage::read_tga_file(const char *filename) {
+bool TGAImage::read_file(const char *filename) {
 	if (data) delete [] data;
 	data = NULL;
 	std::ifstream in;
@@ -145,7 +145,7 @@ bool TGAImage::load_rle_data(std::ifstream &in) {
 	return true;
 }
 
-bool TGAImage::write_tga_file(const char *filename, bool rle) {
+bool TGAImage::write_file(const char *filename, bool rle) {
 	unsigned char developer_area_ref[4] = {0, 0, 0, 0};
 	unsigned char extension_area_ref[4] = {0, 0, 0, 0};
 	unsigned char footer[18] = {'T','R','U','E','V','I','S','I','O','N','-','X','F','I','L','E','.','\0'};
@@ -248,14 +248,14 @@ bool TGAImage::unload_rle_data(std::ofstream &out) {
 	return true;
 }
 
-TGAColor TGAImage::get(int x, int y) {
+Color TGAImage::get(int x, int y) {
 	if (!data || x<0 || y<0 || x>=width || y>=height) {
-		return TGAColor();
+		return Color();
 	}
-	return TGAColor(data+(x+y*width)*bytespp, bytespp);
+	return Color(data+(x+y*width)*bytespp, bytespp);
 }
 
-bool TGAImage::set(int x, int y, TGAColor c) {
+bool TGAImage::set(int x, int y, Color c) {
 	if (!data || x<0 || y<0 || x>=width || y>=height) {
 		return false;
 	}
@@ -280,8 +280,8 @@ bool TGAImage::flip_horizontally() {
 	int half = width>>1;
 	for (int i=0; i<half; i++) {
 		for (int j=0; j<height; j++) {
-			TGAColor c1 = get(i, j);
-			TGAColor c2 = get(width-1-i, j);
+			Color c1 = get(i, j);
+			Color c2 = get(width-1-i, j);
 			set(i, j, c2);
 			set(width-1-i, j, c1);
 		}

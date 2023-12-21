@@ -1,7 +1,7 @@
 #include<shader.h>
 
-Vector4f Shader::sample2D(TGAImage *img, const Vector2f uv) {
-    TGAColor color = img->get(uv.x * img->get_width(), uv.y * img->get_height());
+Vector4f Shader::sample2D(Image *img, const Vector2f uv) {
+    Color color = img->get(uv.x * img->get_width(), uv.y * img->get_height());
     Vector4f sampledColor = Vector4f(color.r, color.g, color.b, color.a) * (1 / 255.0f);
     sampledColor.w = 1;
     return sampledColor;
@@ -111,11 +111,27 @@ class BlinnPhongShader : public Shader {
         }
 };
 
+class PBRDirectShader : public Shader {
+    public:
+        Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
+            return Vector4f(0.0, 0.0, 0.0, 0.0);
+        }
+
+        Vector4f fragment(Vector3f &barycentricFactor) override {
+            return Vector4f(0.0, 0.0, 0.0, 0.0);
+        }
+    
+    private:
+
+};
+
 // Export simple shader
 SimpleShader simpleShader;
 TextureShader textureShader;
 BlinnPhongShader blinnPhoneShader;
+PBRDirectShader pbrDirectShader;
 
 Shader *SIMPLE_SHADER = &simpleShader;
 Shader *TEXTURE_SHADER = &textureShader;
 Shader *BLINNPHONE_SHADER = &blinnPhoneShader;
+Shader *PBR_DIRECT_SHADER = &pbrDirectShader;

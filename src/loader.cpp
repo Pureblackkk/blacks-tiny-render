@@ -51,8 +51,8 @@ bool Loader::loadGeometry(Geometry &geo, const std::string filename) {
     return 0;
 }
 
-bool Loader::loadTexture(TGAImage &img, const char *filename) {
-    bool isSuccess = img.read_tga_file(filename);
+bool Loader::loadTexture(Image &img, const char *filename) {
+    bool isSuccess = img.read_file(filename);
     // Reverse uv coordinates 
     img.flip_vertically();
     return isSuccess;

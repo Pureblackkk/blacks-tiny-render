@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 
     // Add light to scene
     scene.add(light);
-
+    
     // Animation start
     SD2GUI::init(screenWidth, screenHeight, &orbitControl);
     while(SD2GUI::loop()) {

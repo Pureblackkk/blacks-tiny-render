@@ -1,7 +1,8 @@
-#ifndef __IMAGE_H__
-#define __IMAGE_H__
+#ifndef TGAIMAGE_H
+#define TGAIMAGE_H
 
-#include <fstream>
+#include<image.h>
+#include<fstream>
 
 #pragma pack(push,1)
 struct TGA_Header {
@@ -21,8 +22,7 @@ struct TGA_Header {
 #pragma pack(pop)
 
 
-
-struct TGAColor {
+struct TGAColor{
 	union {
 		struct {
 			unsigned char b, g, r, a;
@@ -41,7 +41,7 @@ struct TGAColor {
 	TGAColor(int v, int bpp) : val(v), bytespp(bpp) {
 	}
 
-	TGAColor(const TGAColor &c) : val(c.val), bytespp(c.bytespp) {
+	TGAColor(const Color &c) : val(c.val), bytespp(c.bytespp) {
 	}
 
 	TGAColor(const unsigned char *p, int bpp) : val(0), bytespp(bpp) {
@@ -60,14 +60,14 @@ struct TGAColor {
 };
 
 
-class TGAImage {
+class TGAImage : public Image {
 protected:
 	unsigned char* data;
 	int width;
 	int height;
 	int bytespp;
 
-	bool   load_rle_data(std::ifstream &in);
+	bool load_rle_data(std::ifstream &in);
 	bool unload_rle_data(std::ofstream &out);
 public:
 	enum Format {
@@ -77,15 +77,15 @@ public:
 	TGAImage();
 	TGAImage(int w, int h, int bpp);
 	TGAImage(const TGAImage &img);
-	bool read_tga_file(const char *filename);
-	bool write_tga_file(const char *filename, bool rle=true);
+	bool read_file(const char *filename);
+	bool write_file(const char *filename, bool rle=true);
 	bool flip_horizontally();
 	bool flip_vertically();
 	bool scale(int w, int h);
-	TGAColor get(int x, int y);
-	bool set(int x, int y, TGAColor c);
+	Color get(int x, int y);
+	bool set(int x, int y, Color c);
 	~TGAImage();
-	TGAImage & operator =(const TGAImage &img);
+	TGAImage & operator=(Image &img);
 	int get_width();
 	int get_height();
 	int get_bytespp();
@@ -93,4 +93,4 @@ public:
 	void clear();
 };
 
-#endif //__IMAGE_H__
+#endif

@@ -16,8 +16,8 @@ struct UniformShaderVariable {
     Matrix4f modelViewMatrix;
     Matrix4f projectionMatrix;
     std::vector<Light*> *lights;
-    TGAImage *defaultTexture;
-    TGAImage *normTexture;
+    Image *defaultTexture;
+    Image *normTexture;
     // TODO: add light and other possible global shader variable
 };
 
@@ -53,10 +53,11 @@ class Shader {
         virtual ~Shader() {};
         virtual Vector4f vertex(VertexShaderVariable &vertexShaderVariable) = 0;
         virtual Vector4f fragment(Vector3f &barycentricFactor) = 0;
-        static Vector4f sample2D(TGAImage *img, const Vector2f uv);
+        static Vector4f sample2D(Image *img, const Vector2f uv);
 };
 
 extern Shader *SIMPLE_SHADER;
 extern Shader *TEXTURE_SHADER;
 extern Shader *BLINNPHONE_SHADER;
+extern Shader *PBR_DIRECT_SHADER;
 #endif

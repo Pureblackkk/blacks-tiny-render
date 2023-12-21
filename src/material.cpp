@@ -4,11 +4,11 @@ Material::Material(Shader *bindShader) {
     shader = bindShader;
 }
 
-void Material::bindDefaultTexture(TGAImage *idefaultTexture) {
+void Material::bindDefaultTexture(Image *idefaultTexture) {
     defaultTexture = idefaultTexture;
 }
 
-TGAImage* Material::getDefaultTexture() {
+Image* Material::getDefaultTexture() {
     return defaultTexture;
 }
 

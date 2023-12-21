@@ -7,12 +7,12 @@ class Material {
     public:
         Shader *shader;
         Material(Shader *bindShader);
-        void bindDefaultTexture(TGAImage *defaultTexture);
-        TGAImage* getDefaultTexture();
+        void bindDefaultTexture(Image *defaultTexture);
+        Image* getDefaultTexture();
         // TODO: add more material variable
 
     private:
-        TGAImage *defaultTexture;
+        Image *defaultTexture;
 };
 
 #endif

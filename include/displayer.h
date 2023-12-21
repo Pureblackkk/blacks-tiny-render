@@ -26,7 +26,7 @@ class Displayer {
                         && frameColorRGBA.w == 0
                     ) continue;
 
-                    TGAColor color = TGAColor(
+                    Color color = Color(
                         frameColorRGBA.x,
                         frameColorRGBA.y,
                         frameColorRGBA.z,
@@ -36,12 +36,9 @@ class Displayer {
                     image.set(i, j, color);
                 }
             }
-
-            // Make origin from left bottom corner
-            image.flip_vertically();
-
+            
             // Output to path
-            image.write_tga_file(path.c_str());
+            image.write_file(path.c_str());
         }
 
         void static realTimeDraw(Buffer<Uint32> *frameBuffer) {
