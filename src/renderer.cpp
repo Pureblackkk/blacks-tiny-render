@@ -28,7 +28,7 @@ void Renderer::render(Scene &scene, Camera &camera, std::string outputPath) {
 void Renderer::render(Scene &scene, Camera &camera) {
     // Render meshes
     Renderer::pRender(scene, camera);
-    
+   
     // Change framebuffer render
     Displayer::realTimeDraw(frameBuffer);
 

@@ -12,9 +12,14 @@ set(CMAKE_OSX_ARCHITECTURES "arm64")
 set(SDL_DIR /opt/homebrew/Cellar/sdl2/2.28.5)
 find_package(SDL2 REQUIRED)
 
+# Set png
+set(PNG_DIR /opt/homebrew/Cellar/libpng/1.6.40)
+find_package(PNG REQUIRED)
+
 # Inclue directories 
-include_directories(include libs ${SDL_DIR}/include/)
-link_directories(${SDL_DIR}/lib/)
+include_directories(include libs ${SDL_DIR}/include/ ${PNG_DIR}/include/)
+link_directories(${SDL_DIR}/lib/ ${PNG_DIR}/lib/) 
+
 
 # Set OpenMP compiler
 message(STATUS "set compipler")
@@ -63,4 +68,4 @@ file(GLOB SOURCES
 add_executable(blacks_tiny_render ${SOURCES})
 
 # Link SDL2 OpenMp
-target_link_libraries(blacks_tiny_render SDL2 OpenMP::OpenMP_CXX)
+target_link_libraries(blacks_tiny_render SDL2 PNG OpenMP::OpenMP_CXX)

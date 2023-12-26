@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <string.h>
 #include <time.h>
 #include <math.h>
@@ -100,7 +99,7 @@ bool TGAImage::load_rle_data(std::ifstream &in) {
 	unsigned long pixelcount = width*height;
 	unsigned long currentpixel = 0;
 	unsigned long currentbyte  = 0;
-	TGAColor colorbuffer;
+	Color colorbuffer;
 	do {
 		unsigned char chunkheader = 0;
 		chunkheader = in.get();

@@ -18,7 +18,10 @@ struct UniformShaderVariable {
     std::vector<Light*> *lights;
     Image *defaultTexture;
     Image *normTexture;
-    // TODO: add light and other possible global shader variable
+    Image *albedo;
+    Image *metallic;
+    Image *roughness;
+    // TODO: add other possible global shader variable
 };
 
 struct VertexShaderVariable {

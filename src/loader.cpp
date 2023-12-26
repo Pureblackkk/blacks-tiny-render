@@ -57,3 +57,34 @@ bool Loader::loadTexture(Image &img, const char *filename) {
     img.flip_vertically();
     return isSuccess;
 }
+
+bool Loader::loadTexture(Image **img, const std::string filename) {
+    bool isSuccess = false;
+
+    // Initialize instance based on file suffixes
+    if(hasSuffix(filename, ".tga")) {
+        TGAImage *newInstance = new TGAImage();
+        isSuccess = newInstance->read_file(filename.c_str());
+        newInstance->flip_vertically();
+        *img = newInstance;
+    } else if (hasSuffix(filename, ".png")) {
+        PNGImage *newInstance = new PNGImage();
+        isSuccess = newInstance->read_file(filename.c_str());
+        *img = newInstance;
+    } else {
+        throw std::runtime_error("Load texture failed, wrong texture format");
+        return isSuccess;
+    }
+
+    return isSuccess;
+}
+
+bool Loader::hasSuffix(const std::string& str, const std::string& suffix) {
+    if (str.length() < suffix.length()) {
+        return false;
+    }
+
+    std::string strSuffix = str.substr(str.length() - suffix.length());
+    return strSuffix == suffix;
+}
+

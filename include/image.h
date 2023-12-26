@@ -39,11 +39,6 @@ struct Color {
 };
 
 class Image {
-	protected:
-		unsigned char* data;
-		int width;
-		int height;
-		int bytespp;
     public:
         virtual ~Image() {};
         virtual bool read_file(const char *filename) = 0;

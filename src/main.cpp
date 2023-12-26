@@ -1,5 +1,6 @@
 #include<iostream>
 #include<tgaimage.h>
+#include<pngimage.h>
 #include<matrix4.h>
 #include<geometry.h>
 #include<loader.h>
@@ -34,24 +35,24 @@ int main(int argc, char** argv) {
 
     // Load geometry 1
     Geometry geo;
-    // std::string path = "../obj/floor/floor.obj";
-    std::string path = "../obj/diablo3_pose/diablo3_pose.obj";
+    std::string path = "../obj/pbr_sphere/cube.obj";
     Loader::loadGeometry(geo, path);
 
     // Define material
-    Material material(BLINNPHONE_SHADER);
-    TGAImage defaultTexture;
-    // defaultTexture.read_tga_file("../obj/floor/floor.tga");
-    Loader::loadTexture(defaultTexture, "../obj/diablo3_pose/diablo3_pose_diffuse.tga");
-    material.bindDefaultTexture(&defaultTexture);
+    Material material(TEXTURE_SHADER);
+    std::map<std::string, std::string> texturePathMap;
+    texturePathMap["default"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
+    material.bindTexturesByPathMap(texturePathMap);
+
+    // TGAImage defaultTexture;
+    // Loader::loadTexture(defaultTexture, "../obj/diablo3_pose/diablo3_pose_diffuse.tga");
+    // material.bindDefaultTexture(&defaultTexture);
 
     // Combine geometry and material to generate mesh
     Mesh mesh(geo, material);
 
     // Set mesh rotate and scale
-    mesh.position(-0.5, 0.0, 0.0);
     mesh.rotate(0.1, 0.0, 0.0);
-    mesh.scale(0.5, 0.5, 0.5);
 
     // Init light
     Light light;
@@ -63,7 +64,7 @@ int main(int argc, char** argv) {
 
     // Add light to scene
     scene.add(light);
-    
+
     // Animation start
     SD2GUI::init(screenWidth, screenHeight, &orbitControl);
     while(SD2GUI::loop()) {
