@@ -42,11 +42,11 @@ int main(int argc, char** argv) {
     Material material(TEXTURE_SHADER);
     std::map<std::string, std::string> texturePathMap;
     texturePathMap["default"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
+    texturePathMap["albedo"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
+    texturePathMap["norm"] = "../obj/pbr_sphere/space-cruiser-panels2_normal-ogl.tga";
+    texturePathMap["metallic"] = "../obj/pbr_sphere/space-cruiser-panels2_metallic.tga";
+    texturePathMap["roughness"] = "../obj/pbr_sphere/space-cruiser-panels2_roughness.tga";
     material.bindTexturesByPathMap(texturePathMap);
-
-    // TGAImage defaultTexture;
-    // Loader::loadTexture(defaultTexture, "../obj/diablo3_pose/diablo3_pose_diffuse.tga");
-    // material.bindDefaultTexture(&defaultTexture);
 
     // Combine geometry and material to generate mesh
     Mesh mesh(geo, material);

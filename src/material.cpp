@@ -33,8 +33,6 @@ void Material::bindTexturesByPathMap(std::map<std::string, std::string> &pathMap
             throw std::runtime_error("Texture name not defined");
         }
     }
-
-    defaultTexture->write_file("./test.tga");
 }
 
 Image* Material::getDefaultTexture() {
@@ -55,5 +53,13 @@ Image* Material::getMetallic() {
 
 Image* Material::getRoughness() {
     return roughness;
+}
+
+void Material::setVariableToShaderUniform() {
+    shader->uniform.defaultTexture = defaultTexture;
+    shader->uniform.normTexture = normTexture;
+    shader->uniform.albedo = albedo;
+    shader->uniform.roughness = roughness;
+    shader->uniform.metallic = metallic;
 }
 

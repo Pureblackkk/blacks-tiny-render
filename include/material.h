@@ -17,6 +17,7 @@ class Material {
         Image* getAlbedo();
         Image* getMetallic();
         Image* getRoughness();
+        void setVariableToShaderUniform();
         // TODO: add more material variable
 
     private:

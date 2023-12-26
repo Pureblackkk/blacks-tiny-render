@@ -114,11 +114,12 @@ class BlinnPhongShader : public Shader {
 class PBRDirectShader : public Shader {
     public:
         Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
-            return Vector4f(0.0, 0.0, 0.0, 0.0);
+            Vector4f position(vertexShaderVariable.vert, 1.0);
+            return uniform.projectionMatrix * uniform.modelViewMatrix * position;
         }
 
         Vector4f fragment(Vector3f &barycentricFactor) override {
-            return Vector4f(0.0, 0.0, 0.0, 0.0);
+            return Vector4f(1.0, 0.0, 0.0, 0.0);
         }
     
     private:

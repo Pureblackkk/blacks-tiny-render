@@ -56,9 +56,11 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
         material->shader->uniform.viewMatrix = camera.getViewMatrix();
         material->shader->uniform.modelViewMatrix = camera.getViewMatrix() * mesh->modelMatrix();
         material->shader->uniform.projectionMatrix = camera.getProjectionMatrix();
-        material->shader->uniform.defaultTexture = material->getDefaultTexture();
         material->shader->uniform.lights = lights;
         material->shader->uniform.eye = camera.position();
+        // Bind material variable to shader uniform
+        material->setVariableToShaderUniform();
+        
 
         // Loop geometry faces
         const int meshFaces = geo->nfaces();
