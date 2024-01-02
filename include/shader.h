@@ -12,6 +12,7 @@
 struct UniformShaderVariable {
     Vector3f eye;
     Matrix4f modelMatrix;
+    Matrix4f modelMatrixInverse;
     Matrix4f viewMatrix;
     Matrix4f modelViewMatrix;
     Matrix4f projectionMatrix;
@@ -21,6 +22,7 @@ struct UniformShaderVariable {
     Image *albedo;
     Image *metallic;
     Image *roughness;
+    Image *ao;
     // TODO: add other possible global shader variable
 };
 
@@ -56,7 +58,10 @@ class Shader {
         virtual ~Shader() {};
         virtual Vector4f vertex(VertexShaderVariable &vertexShaderVariable) = 0;
         virtual Vector4f fragment(Vector3f &barycentricFactor) = 0;
-        static Vector4f sample2D(Image *img, const Vector2f uv);
+        static Vector4f sample2DRGBA(Image *img, const Vector2f uv);
+        static float sample2DGRAY(Image *img, const Vector2f uv);
+        template <typename T>
+        static T mix(T &x, T &y, float ratio);
 };
 
 extern Shader *SIMPLE_SHADER;

@@ -13,8 +13,6 @@
 #include<orbitControl.h>
 
 using namespace std;
-using std::cout;
-
 
 int main(int argc, char** argv) {
     const int screenWidth = 1000;
@@ -39,13 +37,13 @@ int main(int argc, char** argv) {
     Loader::loadGeometry(geo, path);
 
     // Define material
-    Material material(TEXTURE_SHADER);
+    Material material(PBR_DIRECT_SHADER);
     std::map<std::string, std::string> texturePathMap;
-    texturePathMap["default"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
     texturePathMap["albedo"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
     texturePathMap["norm"] = "../obj/pbr_sphere/space-cruiser-panels2_normal-ogl.tga";
     texturePathMap["metallic"] = "../obj/pbr_sphere/space-cruiser-panels2_metallic.tga";
     texturePathMap["roughness"] = "../obj/pbr_sphere/space-cruiser-panels2_roughness.tga";
+    texturePathMap["ao"] = "../obj/pbr_sphere/space-cruiser-panels2_ao.tga";
     material.bindTexturesByPathMap(texturePathMap);
 
     // Combine geometry and material to generate mesh
@@ -57,7 +55,8 @@ int main(int argc, char** argv) {
     // Init light
     Light light;
     light.position(10.0, 10.0, 10.0);
-    light.color(0.0, 1.0, 0.0);
+    // Radiance
+    light.color(20.0, 20.0, 20.0);
 
     // Add mesh to scene
     scene.add(mesh);

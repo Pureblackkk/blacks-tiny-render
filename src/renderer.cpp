@@ -53,6 +53,7 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
 
         // Set global shader variable
         material->shader->uniform.modelMatrix = mesh->modelMatrix();
+        material->shader->uniform.modelMatrixInverse = mesh->modelMatrix().inverse();
         material->shader->uniform.viewMatrix = camera.getViewMatrix();
         material->shader->uniform.modelViewMatrix = camera.getViewMatrix() * mesh->modelMatrix();
         material->shader->uniform.projectionMatrix = camera.getProjectionMatrix();

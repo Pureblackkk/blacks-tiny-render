@@ -8,6 +8,7 @@ Material::Material(Shader *bindShader) {
     textureConfigMap["albedo"] = &albedo;
     textureConfigMap["metallic"] = &metallic;
     textureConfigMap["roughness"] = &roughness;
+    textureConfigMap["ao"] = &ao;
 }
 
 void Material::bindDefaultTexture(Image *idefaultTexture) {
@@ -61,5 +62,6 @@ void Material::setVariableToShaderUniform() {
     shader->uniform.albedo = albedo;
     shader->uniform.roughness = roughness;
     shader->uniform.metallic = metallic;
+    shader->uniform.ao = ao;
 }
 

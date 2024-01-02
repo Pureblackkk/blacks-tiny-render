@@ -1,10 +1,20 @@
 #include<shader.h>
 
-Vector4f Shader::sample2D(Image *img, const Vector2f uv) {
+Vector4f Shader::sample2DRGBA(Image *img, const Vector2f uv) {
     Color color = img->get(uv.x * img->get_width(), uv.y * img->get_height());
     Vector4f sampledColor = Vector4f(color.r, color.g, color.b, color.a) * (1 / 255.0f);
     sampledColor.w = 1;
     return sampledColor;
+}
+
+float Shader::sample2DGRAY(Image *img, const Vector2f uv) {
+    Color color = img->get(static_cast<int>(uv.x * img->get_width()), static_cast<int>(uv.y * img->get_height()));
+    return color.val / 255.0;
+}
+
+template <typename T>
+T Shader::mix(T &x, T &y, float ratio) {
+    return x * (1 - ratio) +  y * ratio;
 }
 
 class SimpleShader : public Shader {
@@ -37,7 +47,7 @@ class TextureShader : public Shader {
             Vector2f varyingTexCoord = tex_coord.getVarying(barycentricFactor);
 
             // Get texture color
-            return Shader::sample2D(uniform.defaultTexture, varyingTexCoord);
+            return Shader::sample2DRGBA(uniform.defaultTexture, varyingTexCoord);
         }
 };
 
@@ -88,7 +98,7 @@ class BlinnPhongShader : public Shader {
 
             // Get texture color
             Vector2f varyingTexCoord = tex_coord.getVarying(barycentricFactor);
-            Vector4f textureColor = Shader::sample2D(uniform.defaultTexture, varyingTexCoord);
+            Vector4f textureColor = Shader::sample2DRGBA(uniform.defaultTexture, varyingTexCoord);
 
             // Mix diffuse color, texture color, specular color
             float rate = specularRatio * specular + diffusionRatio * diffusion;
@@ -112,18 +122,152 @@ class BlinnPhongShader : public Shader {
 };
 
 class PBRDirectShader : public Shader {
+    ShaderVarying<Vector2f> texCoord;
+    ShaderVarying<Vector3f> modelPos;
+    ShaderVarying<Vector3f> lightPos;
+    ShaderVarying<Vector3f> eyePos;
+    ShaderVarying<Vector3f> normals;
+    
     public:
         Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
+            // Set texture varying
+            texCoord.set(vertexShaderVariable.tex_coord);
+
+            // Set position in model space
+            modelPos.set(vertexShaderVariable.vert);
+
+            // Set light position in model space
+            Vector3f lightPosInModel = uniform.lights->front()->position();
+            lightPosInModel = (uniform.modelMatrixInverse * (Vector4f(lightPosInModel, 1.0))).vectorThree();
+            lightPos.set(lightPosInModel);
+
+            // Set view position in model space
+            Vector3f viewPosInModel = (uniform.modelMatrixInverse * (Vector4f(uniform.eye, 1.0))).vectorThree();
+            eyePos.set(viewPosInModel);
+
+            // Set norm in model space
+            normals.set(vertexShaderVariable.norm);
+
             Vector4f position(vertexShaderVariable.vert, 1.0);
             return uniform.projectionMatrix * uniform.modelViewMatrix * position;
         }
 
         Vector4f fragment(Vector3f &barycentricFactor) override {
-            return Vector4f(1.0, 0.0, 0.0, 0.0);
+            // Get texture coordinate
+            Vector2f texCoordPerPixel = texCoord.getVarying(barycentricFactor);
+
+            // Get model position
+            Vector3f modelPosPerPixel = modelPos.getVarying(barycentricFactor);
+
+            // Get model light position
+            Vector3f lightPosPerPixel = lightPos.getVarying(barycentricFactor);
+
+            // Get model eye position
+            Vector3f eyePosPerPixel = eyePos.getVarying(barycentricFactor);
+
+            // Get normal
+            Vector3f normalPerPixel = normals.getVarying(barycentricFactor).normalized();
+
+            // View direciton
+            Vector3f viewDir = (eyePosPerPixel - modelPosPerPixel).normalized();
+
+            // Light direction
+            Vector3f lightDir = (lightPosPerPixel - modelPosPerPixel).normalized();
+
+            // Half vector
+            Vector3f halfV = (viewDir + lightDir).normalized();
+
+            // Metallic 
+            float metallic = Shader::sample2DGRAY(uniform.metallic, texCoordPerPixel);
+
+            // Roughness
+            float roughness = Shader::sample2DGRAY(uniform.roughness, texCoordPerPixel);
+
+            // ao
+            float ao = Shader::sample2DGRAY(uniform.ao, texCoordPerPixel);
+            
+            // Albedo
+            Vector3f albedo = Shader::sample2DRGBA(uniform.albedo, texCoordPerPixel).vectorThree();
+            
+            // Norm dot view direction and light direction
+            float nDotV = std::max(static_cast<float>(0.0), normalPerPixel.dot(viewDir));
+            float nDotL = std::max(static_cast<float>(0.0), normalPerPixel.dot(lightDir));
+
+            // Calculate light radiance
+            float distance = (lightPosPerPixel - modelPosPerPixel).length();
+
+            float attenuation = 1.0 / (distance * distance);
+            Vector3f radiance = uniform.lights->front()->color();
+
+            // Calculate Fresnel term
+            // Base albedo as 0.04
+            Vector3f f0(0.04);
+            f0 = Shader::mix(f0, albedo, metallic);
+            
+            Vector3f fTerm = fresnelSchlick(f0, std::max(static_cast<float>(0.0), normalPerPixel.dot(halfV)));
+
+            // Calculate normal distribution term
+            float distrTerm = distributionGGX(normalPerPixel, halfV, roughness);
+
+            // Calculate geometry distribution temr
+            float geoTerm = geometrySmith(nDotV, nDotL, roughness);
+
+            // Get Cook-Torrance brdf
+            Vector3f specularNum = fTerm * distrTerm * geoTerm;
+            float specularDenom = 4.0 * nDotL * nDotV;
+            specularDenom = 1 / std::max(specularDenom, static_cast<float>(0.001));
+            Vector3f specular = specularNum * specularDenom;
+
+            // Get Kd
+            Vector3f kd = Vector3f(1.0) - f0;
+            kd *= 1.0 - metallic;
+
+            // Get diffuse part
+            Vector3f diffuse = kd * albedo * (1.0 / M_PI);
+
+            // Calculate pbr color
+            Vector3f res = (diffuse + specular) * radiance * nDotL;
+            
+            // Add ambient light
+            res += Vector3f(0.03) * albedo * ao;
+
+            // HDR tone mapping
+            res = res / (res + Vector3f(1.0));
+
+            return Vector4f(res, 1.0);
         }
     
     private:
+        Vector3f fresnelSchlick(Vector3f f0, float cosTheta) {
+            return f0 + (Vector3f(1.0) - f0) * std::pow(1. - cosTheta, 5.);
+        }
 
+        float distributionGGX(Vector3f norm, Vector3f halfV, float roughness) {
+            float alpha2 = roughness * roughness;
+            float nDotH = std::max((float)0.0, norm.dot(halfV));
+            float nDotH2 = nDotH * nDotH;
+
+            float num = alpha2;
+            float denom = (nDotH2 * (alpha2 - 1.) + 1.);
+            denom = M_PI * denom * denom;
+
+            return num / denom;
+        }
+
+        float geometrySchlickGGX(float cosTheta, float roughness) {
+            float r = roughness + 1.0;
+            float k = (r * r) / 8.0;
+            float denom = cosTheta * (1 - k) + k;
+
+            return cosTheta / denom;
+        }
+
+        float geometrySmith(float nDotV, float nDotL, float roughness) {
+            float ggxlight = geometrySchlickGGX(nDotL, roughness);
+            float ggxView = geometrySchlickGGX(nDotV, roughness);
+
+            return nDotL * nDotV;
+        }
 };
 
 // Export simple shader

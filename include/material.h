@@ -27,6 +27,7 @@ class Material {
         Image *albedo = nullptr;
         Image *metallic = nullptr;
         Image *roughness = nullptr;
+        Image *ao = nullptr;
 };
 
 #endif
