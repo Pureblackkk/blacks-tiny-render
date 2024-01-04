@@ -19,7 +19,6 @@ int main(int argc, char** argv) {
     const int screenHeight = 1000;
     // Initit scene, camera, renderer
     Scene scene;
-    // OrthoCamera camera(-1.2, 1.2, -1.2, 1.2, 0.01, 100);
     PerspectiveCamera camera(60, 1.0, 0.01, 100);
     Renderer renderer(screenWidth, screenHeight);
 
@@ -31,14 +30,17 @@ int main(int argc, char** argv) {
     // Add oribit control
     OribitControl orbitControl(camera);
 
-    // Load geometry 1
+    // Load geometry
     Geometry geo;
     std::string path = "../obj/pbr_sphere/cube.obj";
-    Loader::loadGeometry(geo, path);
+    // std::string path = "../obj/diablo3_pose/diablo3_pose.obj";
+    Loader::loadGeometry(geo, path, true);
 
     // Define material
     Material material(PBR_DIRECT_SHADER);
     std::map<std::string, std::string> texturePathMap;
+    // texturePathMap["default"] = "../obj/diablo3_pose/diablo3_pose_diffuse.tga";
+    texturePathMap["default"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
     texturePathMap["albedo"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
     texturePathMap["norm"] = "../obj/pbr_sphere/space-cruiser-panels2_normal-ogl.tga";
     texturePathMap["metallic"] = "../obj/pbr_sphere/space-cruiser-panels2_metallic.tga";
@@ -56,7 +58,7 @@ int main(int argc, char** argv) {
     Light light;
     light.position(10.0, 10.0, 10.0);
     // Radiance
-    light.color(20.0, 20.0, 20.0);
+    light.color(15.0, 15.0, 15.0);
 
     // Add mesh to scene
     scene.add(mesh);

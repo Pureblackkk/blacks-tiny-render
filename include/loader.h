@@ -12,7 +12,7 @@
 
 class Loader {
     public:
-        static bool loadGeometry(Geometry &geo, const std::string filename);
+        static bool loadGeometry(Geometry &geo, const std::string filename, bool isCalculateTangentAndBITangent = false);
         static bool loadTexture(Image &img, const char *filename);
         static bool loadTexture(Image **img, const std::string filename);
     

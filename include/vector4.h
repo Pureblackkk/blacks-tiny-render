@@ -31,6 +31,8 @@ class Vector4 {
         Vector4<T> operator*(const Vector4<T> &other) const;
         void operator*=(const T &other);
         void operator*=(const Vector4<T> &other);
+        Vector4<T> operator/(const T &other) const;
+        Vector4<T> operator/(const Vector4<T> &other) const;
         // Dot product
         T dot(const Vector4<T> &other) const;
         // Length
@@ -47,7 +49,10 @@ class Vector4 {
 
 // ===== Constructor
 template <typename T>
-Vector4<T>::Vector4(): x(0), y(0), z(0) {};
+Vector4<T>::Vector4(): x(0), y(0), z(0), w(0) {};
+
+template <typename T>
+Vector4<T>::Vector4(T data): x(data), y(data), z(data), w(data) {};
 
 template <typename T>
 Vector4<T>::Vector4(T x, T y, T z, T w): x(x), y(y), z(z), w(w) {};
@@ -151,10 +156,18 @@ void Vector4<T>::operator*=(const T &other) {
 
 template <typename T>
 void Vector4<T>::operator*=(const Vector4<T> &other) {
-   x *= other.x;
-   y *= other.y;
-   z *= other.z;
-   w *= other.w;
+    return Vector4<T>(x * other, y * other, z * other, w * other);
+}
+
+// /
+template <typename T>
+Vector4<T> Vector4<T>::operator/(const T &other) const {
+    return Vector4<T>(x / other, y / other, z / other, w / other);
+}
+
+template <typename T>
+Vector4<T> Vector4<T>::operator/(const Vector4<T> &other) const {
+    return Vector4<T>(x / other.x, y / other.y, z / other.z, w / other.w);
 }
 
 // ===== Method

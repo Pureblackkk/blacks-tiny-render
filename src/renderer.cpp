@@ -77,6 +77,8 @@ void Renderer::pRender(Scene &scene, Camera &camera) {
                 vsa.vert = geo->vert(i, j);
                 vsa.tex_coord = geo->uv(i, j);
                 vsa.norm = geo->normal(i, j);
+                vsa.tangent = geo->tangent(i);
+                vsa.bitangent = geo->bitangent(i);
 
                 clip_vert[j] = material->shader->vertex(vsa);
             }

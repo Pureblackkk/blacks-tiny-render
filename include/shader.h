@@ -30,6 +30,8 @@ struct VertexShaderVariable {
     Vector3f vert; // Position per vertex
     Vector3f norm; // Normal per vertex
     Vector2f tex_coord; // Texture coordinate per vertex
+    Vector3f tangent; // Tangent per vertex
+    Vector3f bitangent; // Bitangent per vertex
     // TODO: see if need more variable
 };
 
@@ -60,8 +62,10 @@ class Shader {
         virtual Vector4f fragment(Vector3f &barycentricFactor) = 0;
         static Vector4f sample2DRGBA(Image *img, const Vector2f uv);
         static float sample2DGRAY(Image *img, const Vector2f uv);
+        static Vector4f unpackNormal(Vector4f &rgba);
         template <typename T>
         static T mix(T &x, T &y, float ratio);
+       
 };
 
 extern Shader *SIMPLE_SHADER;

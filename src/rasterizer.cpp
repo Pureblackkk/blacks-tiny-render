@@ -36,6 +36,7 @@ void Rasterizer::triangle(
     };
 
     // Go through bounding box
+    #pragma omp parallel for
     for(int i = boundingBox.x; i <= boundingBox.y; ++i) {
         for(int j = boundingBox.z; j <= boundingBox.w; ++j) {
             // Skip those pixel not in the triangle

@@ -1,6 +1,6 @@
 #include<loader.h>
 
-bool Loader::loadGeometry(Geometry &geo, const std::string filename) {
+bool Loader::loadGeometry(Geometry &geo, const std::string filename, bool isCalculateTangentAndBITangent) {
     std::ifstream inputFile(filename);
 
     // Throw error when failed to open
@@ -48,6 +48,11 @@ bool Loader::loadGeometry(Geometry &geo, const std::string filename) {
             }
         }
     }
+
+    if (isCalculateTangentAndBITangent) {
+        geo.calculateTangentAndBITangent();
+    }
+
     return 0;
 }
 

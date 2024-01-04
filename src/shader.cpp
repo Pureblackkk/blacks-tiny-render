@@ -12,6 +12,10 @@ float Shader::sample2DGRAY(Image *img, const Vector2f uv) {
     return color.val / 255.0;
 }
 
+Vector4f Shader::unpackNormal(Vector4f &rgba) {
+    return rgba * 2 - 1;
+}
+
 template <typename T>
 T Shader::mix(T &x, T &y, float ratio) {
     return x * (1 - ratio) +  y * ratio;
@@ -105,6 +109,9 @@ class BlinnPhongShader : public Shader {
             Vector4f finalColor = textureColor * (1 - rate) 
                 + Vector4f(uniform.lights->front()->color(), 1.0) * rate;
 
+            // HDR tone mapping
+            finalColor = finalColor / (finalColor + Vector4f(1.0));
+
             return finalColor;
         }
     
@@ -126,7 +133,9 @@ class PBRDirectShader : public Shader {
     ShaderVarying<Vector3f> modelPos;
     ShaderVarying<Vector3f> lightPos;
     ShaderVarying<Vector3f> eyePos;
-    ShaderVarying<Vector3f> normals;
+    ShaderVarying<Vector3f> vTagent;
+    ShaderVarying<Vector3f> vBitangent;
+    ShaderVarying<Vector3f> normal;
     
     public:
         Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
@@ -145,9 +154,21 @@ class PBRDirectShader : public Shader {
             Vector3f viewPosInModel = (uniform.modelMatrixInverse * (Vector4f(uniform.eye, 1.0))).vectorThree();
             eyePos.set(viewPosInModel);
 
-            // Set norm in model space
-            normals.set(vertexShaderVariable.norm);
+            // Calculate norm by normal map
+            Vector3f tangent = vertexShaderVariable.tangent;
+            Vector3f bitangent = vertexShaderVariable.bitangent;
+            Vector3f norm = vertexShaderVariable.norm;
 
+            tangent = (tangent - (norm * norm.dot(tangent))).normalized();
+            bitangent = norm.cross(tangent).normalized();
+
+
+
+            // Set norm, tagent, bitagent in model space
+            normal.set(vertexShaderVariable.norm);
+            vTagent.set(tangent);
+            vBitangent.set(bitangent);
+        
             Vector4f position(vertexShaderVariable.vert, 1.0);
             return uniform.projectionMatrix * uniform.modelViewMatrix * position;
         }
@@ -165,9 +186,6 @@ class PBRDirectShader : public Shader {
             // Get model eye position
             Vector3f eyePosPerPixel = eyePos.getVarying(barycentricFactor);
 
-            // Get normal
-            Vector3f normalPerPixel = normals.getVarying(barycentricFactor).normalized();
-
             // View direciton
             Vector3f viewDir = (eyePosPerPixel - modelPosPerPixel).normalized();
 
@@ -176,6 +194,22 @@ class PBRDirectShader : public Shader {
 
             // Half vector
             Vector3f halfV = (viewDir + lightDir).normalized();
+
+            // Get normal
+            Vector3f normalPerPixel = normal.getVarying(barycentricFactor).normalized();
+            Vector3f tagentPerPixel = vTagent.getVarying(barycentricFactor).normalized();
+            Vector3f biTagentPerPixel = vBitangent.getVarying(barycentricFactor).normalized();
+
+            Matrix4f tbn(
+                Vector4f(tagentPerPixel.x, biTagentPerPixel.x, normalPerPixel.x, 0.0),
+                Vector4f(tagentPerPixel.y, biTagentPerPixel.y, normalPerPixel.y, 0.0),
+                Vector4f(tagentPerPixel.z, biTagentPerPixel.z, normalPerPixel.z, 0.0),
+                Vector4f(0.0)
+            );
+
+            Vector4f normalRGBA = Shader::sample2DRGBA(uniform.normTexture, texCoordPerPixel);
+            Vector4f tagentSpaceCoords = Shader::unpackNormal(normalRGBA);
+            normalPerPixel = (tbn * tagentSpaceCoords).vectorThree();
 
             // Metallic 
             float metallic = Shader::sample2DGRAY(uniform.metallic, texCoordPerPixel);
