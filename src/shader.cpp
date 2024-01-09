@@ -12,6 +12,48 @@ float Shader::sample2DGRAY(Image *img, const Vector2f uv) {
     return color.val / 255.0;
 }
 
+Vector4f Shader::sampleCubeRGBA(Cubemap *cube, const Vector3f dir) {
+    Vector3f normalizedDir = dir;
+    normalizedDir.normalized();
+
+    float absDirX = std::abs(normalizedDir.x);
+    float absDirY = std::abs(normalizedDir.y);
+    float absDirZ = std::abs(normalizedDir.z);
+
+    float maxVal = std::max(absDirX, std::max(absDirY, absDirZ));
+    float extendScale = 1. / maxVal;
+    Vector3f scaledDir = normalizedDir * extendScale;
+
+    Vector2f uv;
+    Image *face;
+    
+    if (std::abs(maxVal - absDirX) < 1e-6) {
+        // Main axis as X
+        face = cube->getFaces(scaledDir.x < 0 ? 2 : 3);
+        uv = Vector2f(
+            scaledDir.x < 0 ? scaledDir.z : -scaledDir.z,
+            scaledDir.y
+        );
+    } else if (std::abs(maxVal - absDirY) < 1e-6) {
+        // Main axis as Y
+        face = cube->getFaces(scaledDir.y < 0 ? 5 : 4);
+        uv = Vector2f(
+            scaledDir.x,
+            scaledDir.y < 0 ? scaledDir.z : -scaledDir.z
+        );
+    } else {
+        // Main axis as Z
+        face = cube->getFaces(scaledDir.z < 0 ? 1 : 0);
+        uv = Vector2f(
+            scaledDir.z < 0 ? -scaledDir.x : scaledDir.x,
+            scaledDir.y
+        );
+    }
+
+    uv = (uv + 1.0f) / 2.0f;
+    return Shader::sample2DRGBA(face, uv);
+}
+
 Vector4f Shader::unpackNormal(Vector4f &rgba) {
     return rgba * 2 - 1;
 }
@@ -304,13 +346,33 @@ class PBRDirectShader : public Shader {
         }
 };
 
+class SkyboxShader : public Shader {
+    ShaderVarying<Vector3f> sampleDirection;
+
+    Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
+        Vector4f position(vertexShaderVariable.vert, 1.0);
+        sampleDirection.set(vertexShaderVariable.vert);
+        return uniform.projectionMatrix * uniform.modelViewMatrix * position;
+    };
+
+    Vector4f fragment(Vector3f &barycentricFactor) override {
+        Vector3f sampledDirPerpixel = sampleDirection.getVarying(barycentricFactor).normalized();
+        
+        // Sample color from cubemap
+        Vector4f color = Shader::sampleCubeRGBA(uniform.cubemap, sampledDirPerpixel);
+        return color;
+    };
+};
+
 // Export simple shader
 SimpleShader simpleShader;
 TextureShader textureShader;
 BlinnPhongShader blinnPhoneShader;
 PBRDirectShader pbrDirectShader;
+SkyboxShader skyboxShader;
 
 Shader *SIMPLE_SHADER = &simpleShader;
 Shader *TEXTURE_SHADER = &textureShader;
 Shader *BLINNPHONE_SHADER = &blinnPhoneShader;
 Shader *PBR_DIRECT_SHADER = &pbrDirectShader;
+Shader *SKYBOX_SHADER = &skyboxShader;

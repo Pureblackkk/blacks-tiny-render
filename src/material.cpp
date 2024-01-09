@@ -36,6 +36,10 @@ void Material::bindTexturesByPathMap(std::map<std::string, std::string> &pathMap
     }
 }
 
+void Material::bindCubemap(Cubemap &cubemapForbind) {
+    cubemap = &cubemapForbind;
+}
+
 Image* Material::getDefaultTexture() {
     return defaultTexture;
 }
@@ -63,5 +67,6 @@ void Material::setVariableToShaderUniform() {
     shader->uniform.roughness = roughness;
     shader->uniform.metallic = metallic;
     shader->uniform.ao = ao;
+    shader->uniform.cubemap = cubemap;
 }
 

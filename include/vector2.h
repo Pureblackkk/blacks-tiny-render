@@ -26,6 +26,8 @@ class Vector2 {
         Vector2<T> operator*(const Vector2<T> &other) const;
         void operator*=(const T &other);
         void operator*=(const Vector2<T> &other);
+        Vector2<T> operator/(const T &other) const;
+        Vector2<T> operator/(const Vector2<T> &other) const;
         // Dot product
         T dot(const Vector2<T> &other) const;
         // Cross product
@@ -126,6 +128,17 @@ template <typename T>
 void Vector2<T>::operator*=(const Vector2<T> &other) {
    x *= other.x;
    y *= other.y;
+}
+
+// /
+template <typename T>
+Vector2<T> Vector2<T>::operator/(const T &other) const {
+    return Vector2<T>(x / other, y / other);
+}
+
+template <typename T>
+Vector2<T> Vector2<T>::operator/(const Vector2<T> &other) const {
+    return Vector2<T>(x / other.x, y / other.y);
 }
 
 // ===== Methods

@@ -12,6 +12,7 @@ class Material {
         Material(Shader *bindShader);
         void bindDefaultTexture(Image *defaultTexture);
         void bindTexturesByPathMap(std::map<std::string, std::string> &pathMap);
+        void bindCubemap(Cubemap &cubemap);
         Image* getDefaultTexture();
         Image* getNormTexture();
         Image* getAlbedo();
@@ -28,6 +29,7 @@ class Material {
         Image *metallic = nullptr;
         Image *roughness = nullptr;
         Image *ao = nullptr;
+        Cubemap *cubemap = nullptr;
 };
 
 #endif

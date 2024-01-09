@@ -11,6 +11,7 @@
 #include<mesh.h>
 #include<light.h>
 #include<orbitControl.h>
+#include<cubemap.h>
 
 using namespace std;
 
@@ -19,11 +20,11 @@ int main(int argc, char** argv) {
     const int screenHeight = 1000;
     // Initit scene, camera, renderer
     Scene scene;
-    PerspectiveCamera camera(60, 1.0, 0.01, 100);
+    PerspectiveCamera camera(60, 1.0, 0.01, 1000);
     Renderer renderer(screenWidth, screenHeight);
 
     // Set camera position, up, look at
-    camera.position(0.0, 1.0, 3.0);
+    camera.position(0.0, 0.0, 3.0);
     camera.lookat(0.0, 0.0, 0.0);
     camera.up(0.0, 1.0, 0.0);
 
@@ -37,7 +38,7 @@ int main(int argc, char** argv) {
     Loader::loadGeometry(geo, path, true);
 
     // Define material
-    Material material(PBR_DIRECT_SHADER);
+    Material objMaterial(PBR_DIRECT_SHADER);
     std::map<std::string, std::string> texturePathMap;
     // texturePathMap["default"] = "../obj/diablo3_pose/diablo3_pose_diffuse.tga";
     texturePathMap["default"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
@@ -46,10 +47,10 @@ int main(int argc, char** argv) {
     texturePathMap["metallic"] = "../obj/pbr_sphere/space-cruiser-panels2_metallic.tga";
     texturePathMap["roughness"] = "../obj/pbr_sphere/space-cruiser-panels2_roughness.tga";
     texturePathMap["ao"] = "../obj/pbr_sphere/space-cruiser-panels2_ao.tga";
-    material.bindTexturesByPathMap(texturePathMap);
+    objMaterial.bindTexturesByPathMap(texturePathMap);
 
     // Combine geometry and material to generate mesh
-    Mesh mesh(geo, material);
+    Mesh mesh(geo, objMaterial);
 
     // Set mesh rotate and scale
     mesh.rotate(0.1, 0.0, 0.0);
@@ -60,11 +61,29 @@ int main(int argc, char** argv) {
     // Radiance
     light.color(15.0, 15.0, 15.0);
 
-    // Add mesh to scene
+    // Init skybox
+    Cubemap cubemap(
+        "../obj/skybox/front.tga",
+        "../obj/skybox/back.tga",
+        "../obj/skybox/left.tga",
+        "../obj/skybox/right.tga",
+        "../obj/skybox/up.tga",
+        "../obj/skybox/down.tga"
+    );
+    Material skyBoxMaterial(SKYBOX_SHADER);
+    skyBoxMaterial.bindCubemap(cubemap);
+    Mesh skybox(geo, skyBoxMaterial); // Re-use the cube geometry here
+    skybox.scale(50.0f, 50.0f, 50.0f);
+
+
+    // Add object to scene
     scene.add(mesh);
 
     // Add light to scene
     scene.add(light);
+
+    // Add sky box to scene
+    scene.add(skybox);
 
     // Animation start
     SD2GUI::init(screenWidth, screenHeight, &orbitControl);

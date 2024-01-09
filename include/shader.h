@@ -8,6 +8,7 @@
 #include<matrix4.h>
 #include<light.h>
 #include<vector>
+#include<cubemap.h>
 
 struct UniformShaderVariable {
     Vector3f eye;
@@ -23,6 +24,7 @@ struct UniformShaderVariable {
     Image *metallic;
     Image *roughness;
     Image *ao;
+    Cubemap *cubemap;
     // TODO: add other possible global shader variable
 };
 
@@ -63,13 +65,14 @@ class Shader {
         static Vector4f sample2DRGBA(Image *img, const Vector2f uv);
         static float sample2DGRAY(Image *img, const Vector2f uv);
         static Vector4f unpackNormal(Vector4f &rgba);
+        static Vector4f sampleCubeRGBA(Cubemap *cube, const Vector3f dir);
         template <typename T>
         static T mix(T &x, T &y, float ratio);
-       
 };
 
 extern Shader *SIMPLE_SHADER;
 extern Shader *TEXTURE_SHADER;
 extern Shader *BLINNPHONE_SHADER;
 extern Shader *PBR_DIRECT_SHADER;
+extern Shader *SKYBOX_SHADER;
 #endif
