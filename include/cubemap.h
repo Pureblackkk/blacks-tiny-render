@@ -21,7 +21,7 @@ struct Cubemap {
         std::string downPath
     ) {
         Loader::loadTexture(&front, frontPath);
-        Loader::loadTexture(&back, frontPath);
+        Loader::loadTexture(&back, backPath);
         Loader::loadTexture(&left, leftPath);
         Loader::loadTexture(&right, rightPath);
         Loader::loadTexture(&up, upPath);

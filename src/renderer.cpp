@@ -110,7 +110,11 @@ bool Renderer::clipFaces(Vector4f (&clip_vert)[3]) {
 
 void Renderer::homogeneousnDivided(Vector4f (&clip_vert)[3]) {
     for(int i = 0; i < 3; i++) {
+        float wFactor = clip_vert[i].w;
         float factor = 1 / clip_vert[i].w;
         clip_vert[i] = clip_vert[i] * factor;
+        
+        // We kept the w factor since we need the word space z for correcting the barycentric factor
+        clip_vert[i].w = wFactor;
     }
 }

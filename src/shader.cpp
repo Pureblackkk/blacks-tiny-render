@@ -92,6 +92,7 @@ class TextureShader : public Shader {
             // Get texture_coord
             Vector2f varyingTexCoord = tex_coord.getVarying(barycentricFactor);
 
+            
             // Get texture color
             return Shader::sample2DRGBA(uniform.defaultTexture, varyingTexCoord);
         }
@@ -351,7 +352,11 @@ class SkyboxShader : public Shader {
 
     Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
         Vector4f position(vertexShaderVariable.vert, 1.0);
-        sampleDirection.set(vertexShaderVariable.vert);
+        
+        Vector3f vertexAdjusted(vertexShaderVariable.vert);
+        vertexAdjusted.z = -vertexAdjusted.z;
+
+        sampleDirection.set(vertexAdjusted);
         return uniform.projectionMatrix * uniform.modelViewMatrix * position;
     };
 

@@ -27,5 +27,10 @@ class Rasterizer {
             Vector4f &crossProduct,
             const Vector2f &point
         );
+
+        static Vector3f correctBarycentricFactor(
+            Vector4f &barycentricFactorVec, 
+            const Vector3f &cameraSpaceZ
+        );
 };
 #endif

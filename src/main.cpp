@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
     const int screenHeight = 1000;
     // Initit scene, camera, renderer
     Scene scene;
+    // OrthoCamera camera(-1.05, 1.05, -1.05, 1.05, 0.01, 1000);
     PerspectiveCamera camera(60, 1.0, 0.01, 1000);
     Renderer renderer(screenWidth, screenHeight);
 
@@ -34,13 +35,12 @@ int main(int argc, char** argv) {
     // Load geometry
     Geometry geo;
     std::string path = "../obj/pbr_sphere/cube.obj";
-    // std::string path = "../obj/diablo3_pose/diablo3_pose.obj";
     Loader::loadGeometry(geo, path, true);
 
     // Define material
     Material objMaterial(PBR_DIRECT_SHADER);
     std::map<std::string, std::string> texturePathMap;
-    // texturePathMap["default"] = "../obj/diablo3_pose/diablo3_pose_diffuse.tga";
+    // texturePathMap["default"] = "../obj/skybox/front.tga";
     texturePathMap["default"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
     texturePathMap["albedo"] = "../obj/pbr_sphere/space-cruiser-panels2_albedo.tga";
     texturePathMap["norm"] = "../obj/pbr_sphere/space-cruiser-panels2_normal-ogl.tga";
@@ -51,9 +51,6 @@ int main(int argc, char** argv) {
 
     // Combine geometry and material to generate mesh
     Mesh mesh(geo, objMaterial);
-
-    // Set mesh rotate and scale
-    mesh.rotate(0.1, 0.0, 0.0);
 
     // Init light
     Light light;
@@ -73,7 +70,7 @@ int main(int argc, char** argv) {
     Material skyBoxMaterial(SKYBOX_SHADER);
     skyBoxMaterial.bindCubemap(cubemap);
     Mesh skybox(geo, skyBoxMaterial); // Re-use the cube geometry here
-    skybox.scale(50.0f, 50.0f, 50.0f);
+    skybox.scale(30.0f, 30.0f, 30.0f);
 
 
     // Add object to scene

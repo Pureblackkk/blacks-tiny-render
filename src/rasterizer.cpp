@@ -6,6 +6,14 @@ void Rasterizer::triangle(
     Buffer<Uint32> *frameBuffer,
     Buffer<float> *depthBuffer
 ) {
+    // We kept word space z factor
+    Vector3f wordSpaceZ(
+        clip_vert[0].w,
+        clip_vert[1].w,
+        clip_vert[2].w
+    );
+    clip_vert[0].w = 1; clip_vert[1].w = 1; clip_vert[2].w = 1;
+
     // Define frame size vector width, height
     Matrix4f viewPortMatrix = Matrix4f::deviceViewPort(
         static_cast<float>(frameBuffer->width()), 
@@ -47,6 +55,9 @@ void Rasterizer::triangle(
             float barycentricFactor = 1 / area.w;
             area = area * barycentricFactor;
 
+            // Get corrected barycentric coordinates
+            Vector3f barycentricFactorVec = correctBarycentricFactor(area, wordSpaceZ);
+
             // Skip pixel based on z-depth buffer
             float zDpeth = Vector4f(
                 clip_vert[0].z,
@@ -58,7 +69,6 @@ void Rasterizer::triangle(
             if(zDpeth > depthBuffer->get(i, j) || zDpeth > 1.0) continue;
 
             // Set shader barycentricFactor
-            Vector3f barycentricFactorVec(area.x, area.y, area.z);
             Vector4f color = shader->fragment(barycentricFactorVec);
             Uint32 mappedColor = SD2GUI::mapRGBA(color);
 
@@ -123,4 +133,17 @@ bool Rasterizer::isInsideTriagnle(
         && crossProduct1 <= 0
         && crossProduct2 <=0
     );
+}
+
+Vector3f Rasterizer::correctBarycentricFactor(Vector4f &area, const Vector3f &cameraSpaceZ) {
+    Vector3f originFactors = area.vectorThree();
+    Vector3f cameraSpaceDenom(
+        1.0f / cameraSpaceZ.x,
+        1.0f / cameraSpaceZ.y,
+        1.0f / cameraSpaceZ.z
+    );
+
+    float barycentricVec = 1.0f / (originFactors.dot(cameraSpaceDenom));
+
+    return (originFactors / cameraSpaceZ) * barycentricVec;
 }
