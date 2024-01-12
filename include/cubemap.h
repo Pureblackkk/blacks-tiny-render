@@ -10,7 +10,7 @@ struct Cubemap {
     Image *left; // idx 2
     Image *right; // idx 3
     Image *up; // idx 4
-    Image *down; // idx 5 
+    Image *down; // idx 5
 
     Cubemap(
         std::string frontPath, 
@@ -48,7 +48,7 @@ struct Cubemap {
         };
     }
 
-    Vector3f uvToDir(unsigned int face, Vector2f uv) {
+    static Vector3f uvToDir(unsigned int face, Vector2f uv) {
         float x, y, z;
         uv = uv * 2.0 - 1.0;
 

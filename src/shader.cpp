@@ -347,6 +347,185 @@ class PBRDirectShader : public Shader {
         }
 };
 
+class PBRIBLShader : public Shader {
+    ShaderVarying<Vector2f> texCoord;
+    ShaderVarying<Vector3f> modelPos;
+    ShaderVarying<Vector3f> lightPos;
+    ShaderVarying<Vector3f> eyePos;
+    ShaderVarying<Vector3f> vTagent;
+    ShaderVarying<Vector3f> vBitangent;
+    ShaderVarying<Vector3f> normal;
+    
+    public:
+        Vector4f vertex(VertexShaderVariable &vertexShaderVariable) override {
+            // Set texture varying
+            texCoord.set(vertexShaderVariable.tex_coord);
+
+            // Set position in model space
+            modelPos.set(vertexShaderVariable.vert);
+
+            // Set light position in model space
+            Vector3f lightPosInModel = uniform.lights->front()->position();
+            lightPosInModel = (uniform.modelMatrixInverse * (Vector4f(lightPosInModel, 1.0))).vectorThree();
+            lightPos.set(lightPosInModel);
+
+            // Set view position in model space
+            Vector3f viewPosInModel = (uniform.modelMatrixInverse * (Vector4f(uniform.eye, 1.0))).vectorThree();
+            eyePos.set(viewPosInModel);
+
+            // Calculate norm by normal map
+            Vector3f tangent = vertexShaderVariable.tangent;
+            Vector3f bitangent = vertexShaderVariable.bitangent;
+            Vector3f norm = vertexShaderVariable.norm;
+
+            tangent = (tangent - (norm * norm.dot(tangent))).normalized();
+            bitangent = norm.cross(tangent).normalized();
+
+
+
+            // Set norm, tagent, bitagent in model space
+            normal.set(vertexShaderVariable.norm);
+            vTagent.set(tangent);
+            vBitangent.set(bitangent);
+        
+            Vector4f position(vertexShaderVariable.vert, 1.0);
+            return uniform.projectionMatrix * uniform.modelViewMatrix * position;
+        }
+
+        Vector4f fragment(Vector3f &barycentricFactor) override {
+            // Get texture coordinate
+            Vector2f texCoordPerPixel = texCoord.getVarying(barycentricFactor);
+
+            // Get model position
+            Vector3f modelPosPerPixel = modelPos.getVarying(barycentricFactor);
+
+            // Get model light position
+            Vector3f lightPosPerPixel = lightPos.getVarying(barycentricFactor);
+
+            // Get model eye position
+            Vector3f eyePosPerPixel = eyePos.getVarying(barycentricFactor);
+
+            // View direciton
+            Vector3f viewDir = (eyePosPerPixel - modelPosPerPixel).normalized();
+
+            // Light direction
+            Vector3f lightDir = (lightPosPerPixel - modelPosPerPixel).normalized();
+
+            // Half vector
+            Vector3f halfV = (viewDir + lightDir).normalized();
+
+            // Get normal
+            Vector3f normalPerPixel = normal.getVarying(barycentricFactor).normalized();
+            Vector3f tagentPerPixel = vTagent.getVarying(barycentricFactor).normalized();
+            Vector3f biTagentPerPixel = vBitangent.getVarying(barycentricFactor).normalized();
+
+            Matrix4f tbn(
+                Vector4f(tagentPerPixel.x, biTagentPerPixel.x, normalPerPixel.x, 0.0),
+                Vector4f(tagentPerPixel.y, biTagentPerPixel.y, normalPerPixel.y, 0.0),
+                Vector4f(tagentPerPixel.z, biTagentPerPixel.z, normalPerPixel.z, 0.0),
+                Vector4f(0.0)
+            );
+
+            Vector4f normalRGBA = Shader::sample2DRGBA(uniform.normTexture, texCoordPerPixel);
+            Vector4f tagentSpaceCoords = Shader::unpackNormal(normalRGBA);
+            normalPerPixel = (tbn * tagentSpaceCoords).vectorThree();
+
+            // Metallic 
+            float metallic = Shader::sample2DGRAY(uniform.metallic, texCoordPerPixel);
+
+            // Roughness
+            float roughness = Shader::sample2DGRAY(uniform.roughness, texCoordPerPixel);
+
+            // ao
+            float ao = Shader::sample2DGRAY(uniform.ao, texCoordPerPixel);
+            
+            // Albedo
+            Vector3f albedo = Shader::sample2DRGBA(uniform.albedo, texCoordPerPixel).vectorThree();
+            
+            // Norm dot view direction and light direction
+            float nDotV = std::max(static_cast<float>(0.0), normalPerPixel.dot(viewDir));
+            float nDotL = std::max(static_cast<float>(0.0), normalPerPixel.dot(lightDir));
+
+            // Calculate light radiance
+            float distance = (lightPosPerPixel - modelPosPerPixel).length();
+
+            float attenuation = 1.0 / (distance * distance);
+            Vector3f radiance = uniform.lights->front()->color();
+
+            // Calculate Fresnel term
+            // Base albedo as 0.04
+            Vector3f f0(0.04);
+            f0 = Shader::mix(f0, albedo, metallic);
+            
+            Vector3f fTerm = fresnelSchlick(f0, std::max(static_cast<float>(0.0), normalPerPixel.dot(halfV)));
+
+            // Calculate normal distribution term
+            float distrTerm = distributionGGX(normalPerPixel, halfV, roughness);
+
+            // Calculate geometry distribution temr
+            float geoTerm = geometrySmith(nDotV, nDotL, roughness);
+
+            // Get Cook-Torrance brdf
+            Vector3f specularNum = fTerm * distrTerm * geoTerm;
+            float specularDenom = 4.0 * nDotL * nDotV;
+            specularDenom = 1 / std::max(specularDenom, static_cast<float>(0.001));
+            Vector3f specular = specularNum * specularDenom;
+
+            // Get Kd
+            Vector3f kd = Vector3f(1.0) - f0;
+            kd *= 1.0 - metallic;
+
+            // Get diffuse part
+            Vector3f diffuse = kd * albedo * (1.0 / M_PI);
+
+            // Calculate pbr color
+            Vector3f res = (diffuse + specular) * radiance * nDotL;
+            
+            // Add ambient light
+            res += Vector3f(0.03) * albedo * ao;
+
+            // Get image based environment lighting
+            
+
+            // HDR tone mapping
+            res = res / (res + Vector3f(1.0));
+
+            return Vector4f(res, 1.0);
+        }
+    
+    private:
+        Vector3f fresnelSchlick(Vector3f f0, float cosTheta) {
+            return f0 + (Vector3f(1.0) - f0) * std::pow(1. - cosTheta, 5.);
+        }
+
+        float distributionGGX(Vector3f norm, Vector3f halfV, float roughness) {
+            float alpha2 = roughness * roughness;
+            float nDotH = std::max((float)0.0, norm.dot(halfV));
+            float nDotH2 = nDotH * nDotH;
+
+            float num = alpha2;
+            float denom = (nDotH2 * (alpha2 - 1.) + 1.);
+            denom = M_PI * denom * denom;
+
+            return num / denom;
+        }
+
+        float geometrySchlickGGX(float cosTheta, float roughness) {
+            float r = roughness + 1.0;
+            float k = (r * r) / 8.0;
+            float denom = cosTheta * (1 - k) + k;
+
+            return cosTheta / denom;
+        }
+
+        float geometrySmith(float nDotV, float nDotL, float roughness) {
+            float ggxlight = geometrySchlickGGX(nDotL, roughness);
+            float ggxView = geometrySchlickGGX(nDotV, roughness);
+
+            return nDotL * nDotV;
+        }
+};
+
 class SkyboxShader : public Shader {
     ShaderVarying<Vector3f> sampleDirection;
 
@@ -374,10 +553,12 @@ SimpleShader simpleShader;
 TextureShader textureShader;
 BlinnPhongShader blinnPhoneShader;
 PBRDirectShader pbrDirectShader;
+PBRIBLShader pbrIBLShader;
 SkyboxShader skyboxShader;
 
 Shader *SIMPLE_SHADER = &simpleShader;
 Shader *TEXTURE_SHADER = &textureShader;
 Shader *BLINNPHONE_SHADER = &blinnPhoneShader;
 Shader *PBR_DIRECT_SHADER = &pbrDirectShader;
+Shader *PBR_IBL_SHADER = &pbrIBLShader;
 Shader *SKYBOX_SHADER = &skyboxShader;

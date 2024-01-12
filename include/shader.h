@@ -74,5 +74,7 @@ extern Shader *SIMPLE_SHADER;
 extern Shader *TEXTURE_SHADER;
 extern Shader *BLINNPHONE_SHADER;
 extern Shader *PBR_DIRECT_SHADER;
+extern Shader *PBR_IBL_SHADER;
 extern Shader *SKYBOX_SHADER;
+
 #endif
